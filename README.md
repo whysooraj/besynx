@@ -19,22 +19,22 @@
 
 ```mermaid
 graph TD
-    subgraph Browser A (e.g. Chrome)
+    subgraph Browser_A["Browser A (Chrome)"]
         extA[WebExtension background.js]
         dbLocalA[chrome.storage.local Queue]
     end
 
-    subgraph Browser B (e.g. Firefox)
+    subgraph Browser_B["Browser B (Firefox)"]
         extB[WebExtension background.js]
         dbLocalB[chrome.storage.local Queue]
     end
 
-    subgraph Local Machine
+    subgraph Local_Machine["Local Machine"]
         daemon[besynx daemon - Rust]
         db[(SQLite db)]
     end
 
-    subgraph Mobile / Remote Peer
+    subgraph Mobile_Peer["Mobile / Remote Peer"]
         peerDaemon[besynx peer daemon]
     end
 
