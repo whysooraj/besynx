@@ -1,5 +1,3 @@
-mod crypto;
-
 use axum::{
     routing::{get, post},
     Router,
@@ -13,6 +11,7 @@ use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
 use std::time::Instant;
 use tokio::sync::mpsc;
+use protocol::{CookieEvent, PeerMessage, HistoryItem};
 
 #[derive(Clone)]
 struct AppState {
@@ -25,50 +24,75 @@ struct AppState {
     token: String,
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Clone)]
-struct CookieEvent {
-    id: String,
-    event: String,
-    domain: String,
-    name: String,
-    value: String,
-    path: String,
-    secure: bool,
-    http_only: bool,
-    expiration_date: Option<i64>,
-    same_site: String,
-    timestamp: i64,
+fn get_config_dir() -> std::path::PathBuf {
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(appdata) = std::env::var_os("APPDATA") {
+            let mut path = std::path::PathBuf::from(appdata);
+            path.push("Besynx");
+            return path;
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(home) = std::env::var_os("HOME") {
+            let mut path = std::path::PathBuf::from(home);
+            path.push("Library");
+            path.push("Application Support");
+            path.push("Besynx");
+            return path;
+        }
+    }
+    // Default to Linux/Unix (using ~/.config/besynx)
+    if let Some(xdg) = std::env::var_os("XDG_CONFIG_HOME") {
+        let mut path = std::path::PathBuf::from(xdg);
+        path.push("besynx");
+        return path;
+    }
+    if let Some(home) = std::env::var_os("HOME") {
+        let mut path = std::path::PathBuf::from(home);
+        path.push(".config");
+        path.push("besynx");
+        return path;
+    }
+    std::path::PathBuf::from(".config").join("besynx")
 }
+
 
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
     
     // Initialize Database
-    let db_url = "sqlite://besynx.db";
+    let config_dir = get_config_dir();
+    std::fs::create_dir_all(&config_dir).unwrap();
+    let db_path = config_dir.join("besynx.db");
+    
     // Create db file if it doesn't exist
-    if !std::path::Path::new("besynx.db").exists() {
-        std::fs::File::create("besynx.db").unwrap();
+    if !db_path.exists() {
+        std::fs::File::create(&db_path).unwrap();
     }
-    let db = SqlitePool::connect(db_url).await.unwrap();
+    let db_url = format!("sqlite://{}", db_path.to_str().unwrap());
+    let db = SqlitePool::connect(&db_url).await.unwrap();
     
     // Run migrations
     sqlx::migrate!("./migrations").run(&db).await.unwrap();
     tracing::info!("Database migrations applied");
 
-    let identity = Arc::new(crypto::Identity::load_or_generate("besynx.key").unwrap_or_else(|e| {
+    let key_path = config_dir.join("besynx.key");
+    let identity = Arc::new(crypto::Identity::load_or_generate(&key_path).unwrap_or_else(|e| {
         tracing::error!("Identity initialization error: {}", e);
         std::process::exit(1);
     }));
     let pending_challenges = Arc::new(Mutex::new(HashMap::new()));
     let extension_txs = Arc::new(Mutex::new(HashMap::new()));
 
-    let token_path = "besynx.token";
-    let token = if std::path::Path::new(token_path).exists() {
-        std::fs::read_to_string(token_path).unwrap_or_default().trim().to_string()
+    let token_path = config_dir.join("besynx.token");
+    let token = if token_path.exists() {
+        std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
     } else {
         let t = uuid::Uuid::now_v7().to_string();
-        let _ = std::fs::write(token_path, &t);
+        let _ = std::fs::write(&token_path, &t);
         t
     };
     tracing::info!("Extension Auth Token: {}", token);
@@ -393,40 +417,7 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
     Ok(())
 }
 
-#[derive(serde::Deserialize, serde::Serialize)]
-#[serde(tag = "type")]
-enum PeerMessage {
-    HandshakeInit {
-        device_id: String,
-        challenge_hex: String,
-    },
-    HandshakeResponse {
-        signature_hex: String,
-        challenge_hex: String,
-    },
-    HandshakeAck {
-        signature_hex: String,
-    },
-    SyncRequest {
-        last_timestamp: i64,
-    },
-    SyncData {
-        visits: Vec<HistoryItem>,
-    },
-}
 
-#[derive(serde::Deserialize, serde::Serialize)]
-struct HistoryItem {
-    uuid: String,
-    url: String,
-    normalized_url: String,
-    title: String,
-    timestamp: i64,
-    browser: String,
-    device: String,
-    hash: String,
-    visit_type: String,
-}
 
 async fn ws_peer_handler(
     State(state): State<Arc<AppState>>,

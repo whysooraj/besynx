@@ -1,0 +1,8 @@
+[package]
+name = "crypto"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+ed25519-dalek = { version = "2", features = ["serde", "rand_core"] }
+rand = "0.8"

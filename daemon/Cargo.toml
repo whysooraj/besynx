@@ -17,3 +17,6 @@ ed25519-dalek = { version = "2", features = ["serde", "rand_core"] }
 rand = "0.8"
 hex = "0.4"
 futures-util = "0.3"
+crypto = { path = "../crypto" }
+protocol = { path = "../protocol" }
+
