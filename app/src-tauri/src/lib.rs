@@ -8,7 +8,7 @@ use tauri::{
 };
 
 struct DaemonState {
-    child: Mutex<Option<Child>>,
+    child: Arc<Mutex<Option<Child>>>,
     logs: Arc<Mutex<Vec<String>>>,
 }
 
@@ -178,13 +178,15 @@ pub fn run() {
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let pool = rt.block_on(async {
-        sqlx::SqlitePool::connect(&format!("sqlite://{}", db_path.to_string_lossy()))
+        let p = sqlx::SqlitePool::connect(&format!("sqlite://{}", db_path.to_string_lossy()))
             .await
-            .expect("Failed to connect to SQLite database")
+            .expect("Failed to connect to SQLite database");
+        let _ = sqlx::migrate!("../../daemon/migrations").run(&p).await;
+        p
     });
 
     let daemon_state = DaemonState {
-        child: Mutex::new(None),
+        child: Arc::new(Mutex::new(None)),
         logs: Arc::new(Mutex::new(Vec::new())),
     };
 
@@ -242,20 +244,76 @@ pub fn run() {
                 }
             }
 
+            let status_i = MenuItem::with_id(app, "status", "Status: Daemon Running", false, None::<&str>)?;
+            let stats_i = MenuItem::with_id(app, "stats", "Last Sync: N/A", false, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let show_i = MenuItem::with_id(app, "show", "Open Dashboard", true, None::<&str>)?;
             let hide_i = MenuItem::with_id(app, "hide", "Hide Dashboard", true, None::<&str>)?;
             let sep1 = PredefinedMenuItem::separator(app)?;
+            let sep2 = PredefinedMenuItem::separator(app)?;
 
             let menu = Menu::with_items(
                 app,
                 &[
+                    &status_i,
+                    &stats_i,
+                    &sep1,
                     &show_i,
                     &hide_i,
-                    &sep1,
+                    &sep2,
                     &quit_i,
                 ],
             )?;
+
+            let status_clone = status_i.clone();
+            let stats_clone = stats_i.clone();
+            let state = app.state::<DaemonState>();
+            let child_lock = state.child.clone();
+            let pool_clone = app.state::<AppDbState>().pool.clone();
+
+            std::thread::spawn(move || {
+                loop {
+                    std::thread::sleep(std::time::Duration::from_secs(2));
+
+                    let is_running = {
+                        let mut lock = child_lock.lock().unwrap();
+                        if let Some(child) = lock.as_mut() {
+                            match child.try_wait() {
+                                Ok(None) => true,
+                                _ => {
+                                    *lock = None;
+                                    false
+                                }
+                            }
+                        } else {
+                            false
+                        }
+                    };
+
+                    let status_text = if is_running { "Status: Daemon Running" } else { "Status: Daemon Stopped" };
+                    let _ = status_clone.set_text(status_text);
+
+                    let rt = tokio::runtime::Runtime::new().unwrap();
+                    let last_sync: Option<i64> = rt.block_on(async {
+                        sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
+                            .fetch_one(&pool_clone)
+                            .await
+                            .unwrap_or(None)
+                    });
+
+                    let stats_text = match last_sync {
+                        Some(ts) => {
+                            if let Some(dt) = chrono::DateTime::from_timestamp_millis(ts) {
+                                format!("Last Sync: {}", dt.format("%Y-%m-%d %H:%M:%S"))
+                            } else {
+                                "Last Sync: Invalid timestamp".to_string()
+                            }
+                        }
+                        None => "Last Sync: N/A".to_string(),
+                    };
+                    let _ = stats_clone.set_text(stats_text);
+                }
+            });
 
             let icon = app.default_window_icon().cloned().expect("failed to get default window icon");
 
