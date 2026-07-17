@@ -49,3 +49,36 @@ pub struct HistoryItem {
     pub hash: String,
     pub visit_type: String,
 }
+
+pub fn get_config_dir() -> std::path::PathBuf {
+    #[cfg(target_os = "windows")]
+    {
+        if let Some(appdata) = std::env::var_os("APPDATA") {
+            let mut path = std::path::PathBuf::from(appdata);
+            path.push("Besynx");
+            return path;
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(home) = std::env::var_os("HOME") {
+            let mut path = std::path::PathBuf::from(home);
+            path.push("Library");
+            path.push("Application Support");
+            path.push("Besynx");
+            return path;
+        }
+    }
+    if let Some(xdg) = std::env::var_os("XDG_CONFIG_HOME") {
+        let mut path = std::path::PathBuf::from(xdg);
+        path.push("besynx");
+        return path;
+    }
+    if let Some(home) = std::env::var_os("HOME") {
+        let mut path = std::path::PathBuf::from(home);
+        path.push(".config");
+        path.push("besynx");
+        return path;
+    }
+    std::path::PathBuf::from(".")
+}

@@ -11,7 +11,7 @@ use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
 use std::time::Instant;
 use tokio::sync::mpsc;
-use protocol::{CookieEvent, PeerMessage, HistoryItem};
+use protocol::{CookieEvent, PeerMessage, HistoryItem, get_config_dir};
 
 #[derive(Clone)]
 struct AppState {
@@ -22,40 +22,6 @@ struct AppState {
     // Track connected extension ws sender channels:
     extension_txs: Arc<Mutex<HashMap<String, mpsc::UnboundedSender<axum::extract::ws::Message>>>>,
     token: String,
-}
-
-fn get_config_dir() -> std::path::PathBuf {
-    #[cfg(target_os = "windows")]
-    {
-        if let Some(appdata) = std::env::var_os("APPDATA") {
-            let mut path = std::path::PathBuf::from(appdata);
-            path.push("Besynx");
-            return path;
-        }
-    }
-    #[cfg(target_os = "macos")]
-    {
-        if let Some(home) = std::env::var_os("HOME") {
-            let mut path = std::path::PathBuf::from(home);
-            path.push("Library");
-            path.push("Application Support");
-            path.push("Besynx");
-            return path;
-        }
-    }
-    // Default to Linux/Unix (using ~/.config/besynx)
-    if let Some(xdg) = std::env::var_os("XDG_CONFIG_HOME") {
-        let mut path = std::path::PathBuf::from(xdg);
-        path.push("besynx");
-        return path;
-    }
-    if let Some(home) = std::env::var_os("HOME") {
-        let mut path = std::path::PathBuf::from(home);
-        path.push(".config");
-        path.push("besynx");
-        return path;
-    }
-    std::path::PathBuf::from(".config").join("besynx")
 }
 
 

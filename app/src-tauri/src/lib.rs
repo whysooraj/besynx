@@ -96,12 +96,22 @@ fn get_daemon_logs(state: tauri::State<'_, DaemonState>) -> Vec<String> {
     state.logs.lock().unwrap().clone()
 }
 
+fn get_daemon_path() -> std::path::PathBuf {
+    let mut daemon_path = std::env::current_exe().unwrap();
+    daemon_path.pop(); // Remove app binary name
+    daemon_path.push(if cfg!(target_os = "windows") { "besynx-daemon.exe" } else { "besynx-daemon" });
+    if !daemon_path.exists() {
+        daemon_path = std::path::PathBuf::from(if cfg!(target_os = "windows") { "besynx-daemon.exe" } else { "besynx-daemon" });
+    }
+    daemon_path
+}
+
 #[tauri::command]
 fn control_daemon(state: tauri::State<'_, DaemonState>, action: String) -> Result<String, String> {
     let mut lock = state.child.lock().unwrap();
     if action == "start" {
         if lock.is_none() {
-            let daemon_path = std::path::Path::new("/home/whysooraj/Documents/besynx/target/debug/besynx-daemon");
+            let daemon_path = get_daemon_path();
             let mut child = std::process::Command::new(daemon_path)
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
@@ -158,18 +168,17 @@ fn control_daemon(state: tauri::State<'_, DaemonState>, action: String) -> Resul
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // Ensure the database file exists so sqlx can connect
-    let db_path = std::path::Path::new("/home/whysooraj/Documents/besynx/besynx.db");
+    let db_path = protocol::get_config_dir().join("besynx.db");
     if !db_path.exists() {
         if let Some(parent) = db_path.parent() {
             let _ = std::fs::create_dir_all(parent);
         }
-        let _ = std::fs::File::create(db_path);
+        let _ = std::fs::File::create(&db_path);
     }
 
     let rt = tokio::runtime::Runtime::new().unwrap();
     let pool = rt.block_on(async {
-        sqlx::SqlitePool::connect("sqlite:///home/whysooraj/Documents/besynx/besynx.db")
+        sqlx::SqlitePool::connect(&format!("sqlite://{}", db_path.to_string_lossy()))
             .await
             .expect("Failed to connect to SQLite database")
     });
@@ -185,8 +194,7 @@ pub fn run() {
         .manage(AppDbState { pool })
         .invoke_handler(tauri::generate_handler![get_stats, get_daemon_logs, control_daemon])
         .setup(|app| {
-            // Start the daemon process initially
-            let daemon_path = std::path::Path::new("/home/whysooraj/Documents/besynx/target/debug/besynx-daemon");
+            let daemon_path = get_daemon_path();
             let child = std::process::Command::new(daemon_path)
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
@@ -234,24 +242,17 @@ pub fn run() {
                 }
             }
 
-            // Create tray menu
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let show_i = MenuItem::with_id(app, "show", "Open Dashboard", true, None::<&str>)?;
             let hide_i = MenuItem::with_id(app, "hide", "Hide Dashboard", true, None::<&str>)?;
-            let status_i = MenuItem::with_id(app, "status", "Status: Daemon Running", false, None::<&str>)?;
-            let stats_i = MenuItem::with_id(app, "stats", "Last Sync: N/A", false, None::<&str>)?;
             let sep1 = PredefinedMenuItem::separator(app)?;
-            let sep2 = PredefinedMenuItem::separator(app)?;
 
             let menu = Menu::with_items(
                 app,
                 &[
-                    &status_i,
-                    &stats_i,
-                    &sep1,
                     &show_i,
                     &hide_i,
-                    &sep2,
+                    &sep1,
                     &quit_i,
                 ],
             )?;
