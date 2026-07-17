@@ -1,5 +1,6 @@
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use std::process::Child;
+use std::io::{BufRead, BufReader};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::TrayIconBuilder,
@@ -8,6 +9,11 @@ use tauri::{
 
 struct DaemonState {
     child: Mutex<Option<Child>>,
+    logs: Arc<Mutex<Vec<String>>>,
+}
+
+struct AppDbState {
+    pool: sqlx::SqlitePool,
 }
 
 impl Drop for DaemonState {
@@ -18,29 +24,208 @@ impl Drop for DaemonState {
     }
 }
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
+#[derive(serde::Serialize)]
+struct DashboardStats {
+    daemon_status: String,
+    browser_count: i64,
+    last_sync: Option<i64>,
+    history_count: i64,
+    devices: Vec<DeviceEntry>,
+}
+
+#[derive(serde::Serialize, sqlx::FromRow)]
+struct DeviceEntry {
+    id: String,
+    name: String,
+    last_seen: i64,
+}
+
 #[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
+async fn get_stats(
+    daemon_state: tauri::State<'_, DaemonState>,
+    db_state: tauri::State<'_, AppDbState>,
+) -> Result<DashboardStats, String> {
+    let daemon_status = {
+        let mut lock = daemon_state.child.lock().unwrap();
+        if let Some(child) = lock.as_mut() {
+            match child.try_wait() {
+                Ok(None) => "Running".to_string(),
+                _ => {
+                    *lock = None;
+                    "Stopped".to_string()
+                }
+            }
+        } else {
+            "Stopped".to_string()
+        }
+    };
+
+    let pool = &db_state.pool;
+
+    let browser_count: i64 = sqlx::query_scalar("SELECT COUNT(DISTINCT browser) FROM history")
+        .fetch_one(pool)
+        .await
+        .unwrap_or(0);
+
+    let last_sync: Option<i64> = sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
+        .fetch_one(pool)
+        .await
+        .unwrap_or(None);
+
+    let history_count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM history WHERE deleted = 0")
+        .fetch_one(pool)
+        .await
+        .unwrap_or(0);
+
+    let devices: Vec<DeviceEntry> = sqlx::query_as("SELECT id, name, last_seen FROM devices")
+        .fetch_all(pool)
+        .await
+        .unwrap_or_default();
+
+    Ok(DashboardStats {
+        daemon_status,
+        browser_count,
+        last_sync,
+        history_count,
+        devices,
+    })
+}
+
+#[tauri::command]
+fn get_daemon_logs(state: tauri::State<'_, DaemonState>) -> Vec<String> {
+    state.logs.lock().unwrap().clone()
+}
+
+#[tauri::command]
+fn control_daemon(state: tauri::State<'_, DaemonState>, action: String) -> Result<String, String> {
+    let mut lock = state.child.lock().unwrap();
+    if action == "start" {
+        if lock.is_none() {
+            let daemon_path = std::path::Path::new("/home/whysooraj/Documents/besynx/target/debug/besynx-daemon");
+            let mut child = std::process::Command::new(daemon_path)
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn()
+                .map_err(|e| e.to_string())?;
+            
+            let logs = state.logs.clone();
+            if let Some(stdout) = child.stdout.take() {
+                let logs = logs.clone();
+                std::thread::spawn(move || {
+                    let reader = BufReader::new(stdout);
+                    for line in reader.lines() {
+                        if let Ok(line) = line {
+                            let mut l = logs.lock().unwrap();
+                            l.push(line);
+                            if l.len() > 100 {
+                                l.remove(0);
+                            }
+                        }
+                    }
+                });
+            }
+            if let Some(stderr) = child.stderr.take() {
+                let logs = logs.clone();
+                std::thread::spawn(move || {
+                    let reader = BufReader::new(stderr);
+                    for line in reader.lines() {
+                        if let Ok(line) = line {
+                            let mut l = logs.lock().unwrap();
+                            l.push(line);
+                            if l.len() > 100 {
+                                l.remove(0);
+                            }
+                        }
+                    }
+                });
+            }
+            *lock = Some(child);
+            Ok("Daemon started".to_string())
+        } else {
+            Err("Daemon already running".to_string())
+        }
+    } else if action == "stop" {
+        if let Some(mut child) = lock.take() {
+            let _ = child.kill();
+            Ok("Daemon stopped".to_string())
+        } else {
+            Err("Daemon not running".to_string())
+        }
+    } else {
+        Err("Invalid action".to_string())
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // Ensure the database file exists so sqlx can connect
+    let db_path = std::path::Path::new("/home/whysooraj/Documents/besynx/besynx.db");
+    if !db_path.exists() {
+        if let Some(parent) = db_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::File::create(db_path);
+    }
+
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let pool = rt.block_on(async {
+        sqlx::SqlitePool::connect("sqlite:///home/whysooraj/Documents/besynx/besynx.db")
+            .await
+            .expect("Failed to connect to SQLite database")
+    });
+
+    let daemon_state = DaemonState {
+        child: Mutex::new(None),
+        logs: Arc::new(Mutex::new(Vec::new())),
+    };
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .manage(DaemonState {
-            child: Mutex::new(None),
-        })
-        .invoke_handler(tauri::generate_handler![greet])
+        .manage(daemon_state)
+        .manage(AppDbState { pool })
+        .invoke_handler(tauri::generate_handler![get_stats, get_daemon_logs, control_daemon])
         .setup(|app| {
-            // Start the daemon process
+            // Start the daemon process initially
             let daemon_path = std::path::Path::new("/home/whysooraj/Documents/besynx/target/debug/besynx-daemon");
             let child = std::process::Command::new(daemon_path)
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
                 .spawn();
             
             match child {
-                Ok(c) => {
+                Ok(mut c) => {
                     let state = app.state::<DaemonState>();
+                    let logs = state.logs.clone();
+                    if let Some(stdout) = c.stdout.take() {
+                        let logs = logs.clone();
+                        std::thread::spawn(move || {
+                            let reader = BufReader::new(stdout);
+                            for line in reader.lines() {
+                                if let Ok(line) = line {
+                                    let mut l = logs.lock().unwrap();
+                                    l.push(line);
+                                    if l.len() > 100 {
+                                        l.remove(0);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    if let Some(stderr) = c.stderr.take() {
+                        let logs = logs.clone();
+                        std::thread::spawn(move || {
+                            let reader = BufReader::new(stderr);
+                            for line in reader.lines() {
+                                if let Ok(line) = line {
+                                    let mut l = logs.lock().unwrap();
+                                    l.push(line);
+                                    if l.len() > 100 {
+                                        l.remove(0);
+                                    }
+                                }
+                            }
+                        });
+                    }
                     *state.child.lock().unwrap() = Some(c);
                     println!("Daemon started successfully");
                 }

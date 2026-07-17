@@ -4,36 +4,82 @@
     <meta charset="UTF-8" />
     <link rel="stylesheet" href="styles.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri App</title>
+    <title>BeSynx Dashboard</title>
     <script type="module" src="/main.js" defer></script>
   </head>
 
   <body>
-    <main class="container">
-      <h1>Welcome to Tauri</h1>
+    <main class="dashboard-container">
+      <header class="header">
+        <div class="logo-area">
+          <span class="logo-dot"></span>
+          <h1>BeSynx</h1>
+          <span class="badge">V2.0</span>
+        </div>
+        <p class="subtitle">Secure Local-First Browser Sync Control Center</p>
+      </header>
 
-      <div class="row">
-        <a href="https://tauri.app" target="_blank">
-          <img src="/assets/tauri.svg" class="logo tauri" alt="Tauri logo" />
-        </a>
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/JavaScript"
-          target="_blank"
-        >
-          <img
-            src="/assets/javascript.svg"
-            class="logo vanilla"
-            alt="JavaScript logo"
-          />
-        </a>
+      <div class="grid-layout">
+        <!-- Daemon Status Card -->
+        <section class="card daemon-card">
+          <div class="card-header">
+            <h2>Daemon Supervisor</h2>
+          </div>
+          <div class="daemon-info">
+            <div class="status-indicator">
+              <span id="daemon-indicator" class="dot stopped"></span>
+              <span id="daemon-status-text" class="status-label">Stopped</span>
+            </div>
+            <p class="card-desc">Monitors background sync engine process and network endpoints.</p>
+          </div>
+          <div class="button-group">
+            <button id="btn-start" class="btn btn-start">Start Daemon</button>
+            <button id="btn-stop" class="btn btn-stop">Stop Daemon</button>
+          </div>
+        </section>
+
+        <!-- Sync Metrics Card -->
+        <section class="card metrics-card">
+          <div class="card-header">
+            <h2>Sync Statistics</h2>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-item">
+              <span class="metric-value" id="stat-browsers">0</span>
+              <span class="metric-label">Browsers Syncing</span>
+            </div>
+            <div class="metric-item">
+              <span class="metric-value" id="stat-history">0</span>
+              <span class="metric-label">Total History Records</span>
+            </div>
+          </div>
+          <div class="last-sync-area">
+            <span class="label">Last Synced:</span>
+            <span class="value" id="stat-last-sync">Never</span>
+          </div>
+        </section>
+
+        <!-- Devices Card -->
+        <section class="card devices-card">
+          <div class="card-header">
+            <h2>Connected Devices</h2>
+          </div>
+          <div class="devices-list" id="devices-container">
+            <p class="empty-msg">No devices connected.</p>
+          </div>
+        </section>
+
+        <!-- Logs Panel Card -->
+        <section class="card logs-card">
+          <div class="card-header">
+            <h2>Daemon Logs</h2>
+            <button id="btn-clear-logs" class="btn btn-small">Clear View</button>
+          </div>
+          <div class="logs-wrapper">
+            <pre class="logs-panel" id="logs-panel">No logs generated yet.</pre>
+          </div>
+        </section>
       </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
-
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
-      </form>
-      <p id="greet-msg"></p>
     </main>
   </body>
 </html>
