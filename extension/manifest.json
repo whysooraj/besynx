@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "besynx",
+  "version": "0.1.0",
+  "description": "Bitwarden for Browser History",
+  "permissions": ["history", "storage", "cookies"],
+  "host_permissions": ["*://*/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}
+
+

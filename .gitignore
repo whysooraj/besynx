@@ -1,0 +1,6 @@
+/target/
+/daemon/target/
+besynx.db
+besynx.key
+besynx.token
+*.log
