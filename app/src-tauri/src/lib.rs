@@ -271,9 +271,9 @@ pub fn run() {
             let child_lock = state.child.clone();
             let pool_clone = app.state::<AppDbState>().pool.clone();
 
-            std::thread::spawn(move || {
+            tauri::async_runtime::spawn(async move {
                 loop {
-                    std::thread::sleep(std::time::Duration::from_secs(2));
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
                     let is_running = {
                         let mut lock = child_lock.lock().unwrap();
@@ -293,13 +293,10 @@ pub fn run() {
                     let status_text = if is_running { "Status: Daemon Running" } else { "Status: Daemon Stopped" };
                     let _ = status_clone.set_text(status_text);
 
-                    let rt = tokio::runtime::Runtime::new().unwrap();
-                    let last_sync: Option<i64> = rt.block_on(async {
-                        sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
-                            .fetch_one(&pool_clone)
-                            .await
-                            .unwrap_or(None)
-                    });
+                    let last_sync: Option<i64> = sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
+                        .fetch_one(&pool_clone)
+                        .await
+                        .unwrap_or(None);
 
                     let stats_text = match last_sync {
                         Some(ts) => {
