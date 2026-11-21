@@ -55,10 +55,34 @@ async fn main() {
 
     let token_path = config_dir.join("besynx.token");
     let token = if token_path.exists() {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+        }
         std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
     } else {
         let t = uuid::Uuid::now_v7().to_string();
-        let _ = std::fs::write(&token_path, &t);
+        #[cfg(unix)]
+        {
+            use std::io::Write;
+            use std::os::unix::fs::OpenOptionsExt;
+            if let Ok(mut f) = std::fs::OpenOptions::new()
+                .create(true)
+                .write(true)
+                .truncate(true)
+                .mode(0o600)
+                .open(&token_path)
+            {
+                let _ = f.write_all(t.as_bytes());
+            }
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+        }
+        #[cfg(not(unix))]
+        {
+            let _ = std::fs::write(&token_path, &t);
+        }
         t
     };
     tracing::info!("Extension Auth Token: {}", token);
@@ -304,14 +328,21 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
                             Ok::<(), sqlx::Error>(())
                         }.await;
 
-                        if let Err(e) = db_result {
-                            tracing::error!("Failed to store visit item {}: {:?}", id, e);
+                        match db_result {
+                            Ok(()) => {
+                                let ack_resp = serde_json::to_string(&serde_json::json!({ "ack": id })).unwrap();
+                                let _ = state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
+                                    let _ = tx.send(axum::extract::ws::Message::Text(ack_resp.into()));
+                                });
+                            }
+                            Err(e) => {
+                                tracing::error!("Failed to store visit item {}: {:?}", id, e);
+                                let nack_resp = serde_json::to_string(&serde_json::json!({ "nack": id, "error": e.to_string() })).unwrap();
+                                let _ = state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
+                                    let _ = tx.send(axum::extract::ws::Message::Text(nack_resp.into()));
+                                });
+                            }
                         }
-
-                        let ack_resp = serde_json::to_string(&serde_json::json!({ "ack": id })).unwrap();
-                        let _ = state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
-                            let _ = tx.send(axum::extract::ws::Message::Text(ack_resp.into()));
-                        });
                     }
                 } else if event == "cookie_changed" {
                     if let Ok(cookie_evt) = serde_json::from_value::<CookieEvent>(raw.clone()) {
@@ -557,6 +588,77 @@ async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) 
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    #[cfg(unix)]
+    fn test_token_file_permissions() {
+        use std::os::unix::fs::PermissionsExt;
+        let temp_dir = std::env::temp_dir().join(format!("besynx_token_test_{}", uuid::Uuid::now_v7()));
+        std::fs::create_dir_all(&temp_dir).unwrap();
+        let token_path = temp_dir.join("besynx.token");
+
+        // Creation test
+        let token = if token_path.exists() {
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+            }
+            std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
+        } else {
+            let t = uuid::Uuid::now_v7().to_string();
+            #[cfg(unix)]
+            {
+                use std::io::Write;
+                use std::os::unix::fs::OpenOptionsExt;
+                if let Ok(mut f) = std::fs::OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .truncate(true)
+                    .mode(0o600)
+                    .open(&token_path)
+                {
+                    let _ = f.write_all(t.as_bytes());
+                }
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+            }
+            #[cfg(not(unix))]
+            {
+                let _ = std::fs::write(&token_path, &t);
+            }
+            t
+        };
+
+        assert!(!token.is_empty());
+        let meta = std::fs::metadata(&token_path).unwrap();
+        assert_eq!(meta.permissions().mode() & 0o777, 0o600);
+
+        // Pre-existing file with 0644 should be reset to 0600
+        std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o644)).unwrap();
+        assert_eq!(std::fs::metadata(&token_path).unwrap().permissions().mode() & 0o777, 0o644);
+
+        let read_token = if token_path.exists() {
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+            }
+            std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
+        } else {
+            let t = uuid::Uuid::now_v7().to_string();
+            t
+        };
+
+        assert_eq!(read_token, token);
+        let meta_after = std::fs::metadata(&token_path).unwrap();
+        assert_eq!(meta_after.permissions().mode() & 0o777, 0o600);
+
+        let _ = std::fs::remove_dir_all(&temp_dir);
+    }
 }
 
 
