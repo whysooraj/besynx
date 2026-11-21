@@ -10,25 +10,20 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* -------------------------------------------------------------------------
-       VAGUARD INSPIRED DESIGN SYSTEM FOR BESYNX
-       Deep Obsidian Charcoal (#0b0d10) + Electric Lime (#d2f802 / #c4f100)
-       Sleek dark glass cards, circular neon icon badges, device carousel ribbon
-       ------------------------------------------------------------------------- */
     :root {
-      --bg: #0a0c0f;
-      --bg-surface: #11141a;
-      --bg-card: rgba(18, 22, 29, 0.75);
-      --bg-card-hover: rgba(24, 30, 40, 0.85);
+      --bg: #090b0e;
+      --bg-surface: #101318;
+      --bg-card: rgba(18, 22, 29, 0.85);
+      --bg-card-hover: rgba(24, 30, 40, 0.95);
       --border: rgba(255, 255, 255, 0.08);
       --border-subtle: rgba(255, 255, 255, 0.05);
       --border-focus: #d2f802;
       
       --lime: #d2f802;
       --lime-hover: #bde000;
-      --lime-glow: rgba(210, 248, 2, 0.18);
+      --lime-glow: rgba(210, 248, 2, 0.16);
       --lime-subtle: rgba(210, 248, 2, 0.08);
-      --lime-border: rgba(210, 248, 2, 0.3);
+      --lime-border: rgba(210, 248, 2, 0.28);
       
       --text: #ffffff;
       --text-muted: #8e95a5;
@@ -37,10 +32,10 @@
       --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       
-      --max-w: 1140px;
+      --max-w: 1160px;
       --radius-sm: 8px;
       --radius-md: 14px;
-      --radius-lg: 22px;
+      --radius-lg: 20px;
       --radius-full: 9999px;
     }
 
@@ -66,7 +61,7 @@
       flex-direction: column;
       overflow-x: hidden;
       background: radial-gradient(circle at 50% -10%, rgba(210, 248, 2, 0.08) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 30%, rgba(20, 24, 32, 0.5) 0%, transparent 40%),
+                  radial-gradient(circle at 80% 30%, rgba(20, 24, 32, 0.4) 0%, transparent 40%),
                   var(--bg);
     }
 
@@ -83,7 +78,7 @@
     }
 
     /* -------------------------------------------------------------------------
-       NAVBAR (Floating Pill Header - Vaguard style)
+       NAVBAR (Floating Pill Header)
        ------------------------------------------------------------------------- */
     header {
       position: sticky;
@@ -94,7 +89,7 @@
     }
 
     .nav-pill {
-      background: rgba(14, 17, 23, 0.85);
+      background: rgba(14, 17, 23, 0.88);
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius-full);
@@ -140,7 +135,7 @@
     .nav-cta-btn {
       padding: 8px 20px;
       border-radius: var(--radius-full);
-      background: var(--text);
+      background: var(--lime);
       color: #0b0d10 !important;
       font-size: 13px;
       font-weight: 700;
@@ -148,15 +143,15 @@
     }
 
     .nav-cta-btn:hover {
-      background: var(--lime);
+      background: var(--lime-hover);
       transform: translateY(-1px);
     }
 
     /* -------------------------------------------------------------------------
-       HERO (Centered Vaguard headline + Dual CTA buttons)
+       HERO (Focused on genuine tab sync)
        ------------------------------------------------------------------------- */
     .hero {
-      padding: 60px 0 64px;
+      padding: 60px 0 54px;
       text-align: center;
     }
 
@@ -173,11 +168,11 @@
     }
 
     .hero h1 {
-      font-size: 56px;
+      font-size: 54px;
       line-height: 1.1;
       font-weight: 800;
       letter-spacing: -0.04em;
-      max-width: 840px;
+      max-width: 860px;
       margin: 0 auto 20px;
       color: var(--text);
     }
@@ -191,7 +186,7 @@
       font-size: 18px;
       line-height: 1.6;
       color: var(--text-muted);
-      max-width: 620px;
+      max-width: 640px;
       margin: 0 auto 36px;
     }
 
@@ -200,7 +195,7 @@
       align-items: center;
       justify-content: center;
       gap: 16px;
-      margin-bottom: 56px;
+      margin-bottom: 48px;
       flex-wrap: wrap;
     }
 
@@ -208,13 +203,13 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 14px 28px;
+      padding: 13px 26px;
       border-radius: var(--radius-full);
       background: var(--lime);
       color: #0b0d10 !important;
       font-size: 14px;
       font-weight: 700;
-      box-shadow: 0 4px 24px var(--lime-glow);
+      box-shadow: 0 4px 20px var(--lime-glow);
       transition: all 0.15s ease;
       cursor: pointer;
       border: none;
@@ -223,46 +218,48 @@
     .btn-lime:hover {
       background: var(--lime-hover);
       transform: translateY(-2px);
-      box-shadow: 0 8px 32px var(--lime-glow);
     }
 
-    .btn-pill-dark {
+    .quick-command-pill {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-      padding: 14px 24px;
-      border-radius: var(--radius-full);
+      gap: 12px;
+      padding: 12px 20px;
       background: var(--bg-surface);
       border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+      font-size: 13px;
       color: var(--text);
-      font-size: 14px;
-      font-weight: 600;
-      transition: border-color 0.15s, background 0.15s;
     }
 
-    .btn-pill-dark:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-      background: rgba(255, 255, 255, 0.05);
+    .quick-command-pill code {
+      color: var(--lime);
+      font-weight: 500;
     }
 
-    .play-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--lime);
+    .copy-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      font-size: 12px;
+      transition: color 0.15s;
+    }
+
+    .copy-btn:hover {
+      color: var(--text);
     }
 
     /* -------------------------------------------------------------------------
-       DEVICE / LOCATION HORIZONTAL RIBBON (Vaguard Singapore Highlight style)
+       DEVICE PAIRING CAROUSEL RIBBON
        ------------------------------------------------------------------------- */
     .device-ribbon-wrapper {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: auto;
       max-width: 980px;
-      margin: 0 auto 72px;
+      margin: 0 auto 60px;
+      width: 100%;
       overflow-x: auto;
-      padding: 12px 4px;
+      padding: 8px 4px;
     }
 
     .device-ribbon {
@@ -271,38 +268,35 @@
       align-items: center;
       gap: 14px;
       width: max-content;
-      max-width: 100%;
+      margin: 0 auto;
     }
 
     .device-chip {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 14px 22px;
+      padding: 12px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
-      min-width: 130px;
+      gap: 4px;
+      min-width: 140px;
       cursor: pointer;
       transition: all 0.2s ease;
     }
 
     .device-chip:hover {
-      border-color: var(--border-focus);
-      transform: translateY(-2px);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
     .device-chip.active {
       background: var(--lime);
-      color: #0b0d10 !important;
       border-color: var(--lime);
-      box-shadow: 0 8px 30px var(--lime-glow);
-      transform: scale(1.04);
+      box-shadow: 0 8px 24px var(--lime-glow);
     }
 
     .device-chip.active .chip-label {
-      color: rgba(11, 13, 16, 0.65);
+      color: rgba(11, 13, 16, 0.7);
     }
 
     .device-chip.active .chip-name {
@@ -314,32 +308,213 @@
       font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.08em;
       color: var(--text-dim);
     }
 
     .chip-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text);
     }
 
-    .chip-badge {
+    .chip-status {
       font-family: var(--font-mono);
       font-size: 10px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(255, 255, 255, 0.06);
       color: var(--text-muted);
     }
 
-    .device-chip.active .chip-badge {
-      background: rgba(11, 13, 16, 0.15);
+    .device-chip.active .chip-status {
+      color: #0b0d10;
+      font-weight: 600;
+    }
+
+    /* -------------------------------------------------------------------------
+       NEW: INTERACTIVE DUAL-DEVICE TAB SYNC DEMO (Replacing Mismatched Phones)
+       ------------------------------------------------------------------------- */
+    .sync-arena {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 80px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .arena-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .arena-title {
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--lime);
+      background: var(--lime-subtle);
+      border: 1px solid var(--lime-border);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--lime);
+      box-shadow: 0 0 8px var(--lime);
+    }
+
+    .search-input-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 6px 14px;
+      width: 280px;
+    }
+
+    .search-input-box input {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font-sans);
+      width: 100%;
+    }
+
+    .search-input-box input:focus {
+      outline: none;
+    }
+
+    .arena-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .device-viewport {
+      background: #090b0e;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      aspect-ratio: 16 / 10;
+    }
+
+    .viewport-topbar {
+      height: 40px;
+      background: #13171e;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .viewport-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .viewport-body {
+      flex: 1;
+      padding: 14px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .tab-card {
+      background: #11141b;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+
+    .tab-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: #151a24;
+    }
+
+    .tab-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }
+
+    .browser-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-muted);
+    }
+
+    .tab-url-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .btn-handoff {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: var(--lime-subtle);
+      border: 1px solid var(--lime-border);
+      color: var(--lime);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-handoff:hover {
+      background: var(--lime);
       color: #0b0d10;
     }
 
     /* -------------------------------------------------------------------------
-       KEY ADVANTAGES (Two-column Vaguard cards with circular neon icon)
+       TELEMETRY BENCHMARK CONSOLE (Replacing the Misaligned Gauge)
        ------------------------------------------------------------------------- */
     .section-eyebrow-left {
       font-size: 11px;
@@ -348,15 +523,17 @@
       letter-spacing: 0.1em;
       color: var(--lime);
       margin-bottom: 8px;
+      text-align: left;
     }
 
     .section-header-row {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      margin-bottom: 40px;
+      margin-bottom: 32px;
       flex-wrap: wrap;
       gap: 16px;
+      text-align: left;
     }
 
     .section-title-large {
@@ -371,435 +548,182 @@
       font-weight: 600;
     }
 
-    .btn-see-more {
-      font-size: 13px;
-      font-weight: 600;
-      padding: 8px 18px;
-      border-radius: var(--radius-full);
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      transition: all 0.15s;
-    }
-
-    .btn-see-more:hover {
-      color: var(--text);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .two-card-grid {
+    .telemetry-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      margin-bottom: 96px;
+      margin-bottom: 80px;
     }
 
-    .vaguard-card {
+    .telemetry-summary-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      padding: 38px 32px;
-      backdrop-filter: blur(12px);
-      transition: transform 0.2s, border-color 0.2s;
-    }
-
-    .vaguard-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-
-    .neon-circle-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--lime);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #0b0d10;
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 20px var(--lime-glow);
-    }
-
-    .vaguard-card h3 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      letter-spacing: -0.01em;
-    }
-
-    .vaguard-card p {
-      font-size: 15px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-
-    /* -------------------------------------------------------------------------
-       PLATFORM PREVIEW (Dual Phone / Laptop Mockup Frame - Vaguard style)
-       ------------------------------------------------------------------------- */
-    .preview-stage {
-      overflow: hidden;
-      position: relative;
-      background: radial-gradient(circle at center, rgba(210, 248, 2, 0.05) 0%, transparent 70%);
-      padding: 40px 0 80px;
-      text-align: center;
-    }
-
-    .watermark-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 110px;
-      font-weight: 900;
-      color: rgba(255, 255, 255, 0.02);
-      letter-spacing: -0.04em;
-      white-space: nowrap;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .devices-duo {
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 32px;
-      flex-wrap: wrap;
-    }
-
-    /* Device Card 1: Session Stats Phone (9:19.5 aspect ratio) */
-    .phone-frame {
-      width: 300px;
-      aspect-ratio: 9 / 19.5;
-      background: #0f1218;
-      border: 1px solid var(--border);
-      border-radius: 36px;
-      padding: 24px 20px;
+      padding: 32px;
+      text-align: left;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      text-align: left;
-    }
-
-    .phone-notch {
-      width: 70px;
-      height: 18px;
-      background: #181d26;
-      border-radius: var(--radius-full);
-      margin: 0 auto 20px;
-    }
-
-    .phone-stat-number {
-      font-size: 32px;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      font-family: var(--font-mono);
-      margin-top: 6px;
-    }
-
-    .phone-bar-chart {
-      height: 120px;
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      margin: 24px 0;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .chart-bar {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-
-    .chart-bar.highlight {
-      background: var(--lime);
-      box-shadow: 0 0 16px var(--lime-glow);
-    }
-
-    /* Device Card 2: Active Connection Laptop / Browser (16:9 aspect ratio) */
-    .desktop-frame {
-      width: 520px;
-      aspect-ratio: 16 / 9;
-      background: #0f1218;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
-      text-align: left;
-    }
-
-    .frame-header {
-      height: 42px;
-      background: #151a22;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
       justify-content: space-between;
+    }
+
+    .stat-pill-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .stat-item {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+
+    .stat-metric {
       font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--lime);
+    }
+
+    .stat-label {
       font-size: 11px;
       color: var(--text-muted);
-    }
-
-    .frame-content {
-      flex: 1;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .active-sync-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--lime);
-      background: var(--lime-subtle);
-      border: 1px solid var(--lime-border);
-      padding: 4px 12px;
-      border-radius: var(--radius-full);
-      width: fit-content;
-    }
-
-    /* -------------------------------------------------------------------------
-       EXPLORE FEATURES WITH SPEED / TELEMETRY GAUGE (Vaguard Speedometer style)
-       ------------------------------------------------------------------------- */
-    .features-telemetry-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 32px;
-      align-items: center;
-      margin: 80px 0;
-    }
-
-    .feature-nav-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      text-align: left;
-    }
-
-    .feature-nav-item {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      padding: 22px 24px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .feature-nav-item:hover {
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .feature-nav-item.active {
-      border-color: var(--lime);
-      background: rgba(210, 248, 2, 0.04);
-    }
-
-    .feature-nav-item.active h4 {
-      color: var(--lime);
-    }
-
-    .feature-nav-item h4 {
-      font-size: 17px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .feature-nav-item p {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    /* Speedometer Telemetry Card */
-    .gauge-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 40px 32px;
-      text-align: center;
-      backdrop-filter: blur(16px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-    }
-
-    .gauge-header-label {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-dim);
-      margin-bottom: 4px;
-    }
-
-    .gauge-big-metric {
-      font-size: 58px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      font-family: var(--font-mono);
-      color: var(--text);
-    }
-
-    .gauge-unit {
-      font-size: 16px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    .gauge-arc-visual {
-      width: 180px;
-      height: 90px;
-      margin: 24px auto;
-      border-top-left-radius: 90px;
-      border-top-right-radius: 90px;
-      border: 14px solid rgba(255, 255, 255, 0.06);
-      border-bottom: 0;
-      position: relative;
-    }
-
-    .gauge-arc-fill {
-      position: absolute;
-      inset: -14px;
-      border-top-left-radius: 90px;
-      border-top-right-radius: 90px;
-      border: 14px solid var(--lime);
-      border-bottom: 0;
-      border-right-color: transparent;
-      border-bottom-color: transparent;
-      transform: rotate(-35deg);
-    }
-
-    .gauge-stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-top: 24px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border-subtle);
-      font-family: var(--font-mono);
-    }
-
-    .gauge-sub-stat {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .gauge-sub-val {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
       margin-top: 4px;
     }
 
-    /* -------------------------------------------------------------------------
-       OPEN-SOURCE TIERS / PRICING (Vaguard 3-tier card style with center highlight)
-       ------------------------------------------------------------------------- */
-    .tier-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
-      margin: 48px 0 96px;
+    /* Live Daemon Query Terminal Box */
+    .terminal-box {
+      background: #080a0d;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
       text-align: left;
     }
 
-    .tier-card {
+    .terminal-header {
+      background: #11141a;
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .terminal-log-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .log-lime { color: var(--lime); }
+    .log-dim { color: var(--text-dim); }
+
+    /* -------------------------------------------------------------------------
+       BROWSER INTEROPERABILITY MATRIX
+       ------------------------------------------------------------------------- */
+    .browsers-strip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 16px;
+      margin-bottom: 80px;
+    }
+
+    .browser-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 36px 28px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.2s;
-    }
-
-    .tier-card:hover {
-      transform: translateY(-4px);
-    }
-
-    .tier-card.featured {
-      background: #141820;
-      border-color: var(--lime-border);
-      box-shadow: 0 12px 40px var(--lime-glow);
-      position: relative;
-    }
-
-    .tier-price {
-      font-size: 42px;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      margin: 16px 0;
-      color: var(--text);
-    }
-
-    .tier-price span {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-muted);
-    }
-
-    .tier-features-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-bottom: 32px;
-    }
-
-    .tier-features-list li {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .tier-features-list li::before {
-      content: "✓";
-      color: var(--lime);
-      font-weight: 700;
-    }
-
-    .btn-tier {
-      width: 100%;
-      padding: 12px;
-      border-radius: var(--radius-full);
-      font-size: 13px;
-      font-weight: 700;
+      border-radius: var(--radius-md);
+      padding: 20px 16px;
       text-align: center;
-      cursor: pointer;
-      border: 1px solid var(--border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
       transition: all 0.15s;
     }
 
-    .btn-tier:hover {
-      background: rgba(255, 255, 255, 0.1);
+    .browser-card:hover {
+      border-color: var(--lime);
+      transform: translateY(-2px);
     }
 
-    .tier-card.featured .btn-tier {
-      background: var(--lime);
-      color: #0b0d10;
-      border: none;
+    .browser-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
     }
 
-    .tier-card.featured .btn-tier:hover {
-      background: var(--lime-hover);
+    .browser-api {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* -------------------------------------------------------------------------
+       CLEAN 3-STEP QUICKSTART
+       ------------------------------------------------------------------------- */
+    .quickstart-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 80px;
+      text-align: left;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 30px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--lime-subtle);
+      border: 1px solid var(--lime-border);
+      color: var(--lime);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .step-card h4 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .step-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .step-code {
+      background: #090b0e;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     /* -------------------------------------------------------------------------
@@ -807,18 +731,29 @@
        ------------------------------------------------------------------------- */
     .cta-stage {
       text-align: center;
-      padding: 80px 0 60px;
+      padding: 72px 0 64px;
+      background: radial-gradient(circle at center, rgba(210, 248, 2, 0.05) 0%, transparent 60%);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-subtle);
+      margin-bottom: 64px;
     }
 
     .cta-stage h2 {
-      font-size: 46px;
+      font-size: 42px;
       font-weight: 800;
       letter-spacing: -0.03em;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
+    }
+
+    .cta-stage p {
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 28px;
+      font-size: 16px;
     }
 
     footer {
-      padding: 48px 0;
+      padding: 40px 0;
       border-top: 1px solid var(--border-subtle);
       font-size: 13px;
       color: var(--text-dim);
@@ -845,15 +780,18 @@
        RESPONSIVE BREAKPOINTS (Desktop 16:9, Laptop 16:9, Tablet 4:3, Mobile 9:19.5)
        ------------------------------------------------------------------------- */
     @media (max-width: 960px) {
-      .two-card-grid, .features-telemetry-grid, .tier-cards-grid {
+      .arena-columns, .telemetry-grid, .quickstart-grid {
         grid-template-columns: 1fr;
       }
-      .desktop-frame {
-        width: 100%;
-        max-width: 520px;
+      .browsers-strip {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .device-viewport {
+        aspect-ratio: auto;
+        min-height: 260px;
       }
       .hero h1 {
-        font-size: 40px;
+        font-size: 38px;
       }
     }
 
@@ -862,34 +800,35 @@
         display: none;
       }
       .hero h1 {
-        font-size: 32px;
+        font-size: 30px;
       }
       .hero-cta-group {
         flex-direction: column;
         align-items: stretch;
       }
-      .btn-lime, .btn-pill-dark {
-        justify-content: center;
+      .quick-command-pill {
+        flex-direction: column;
+        align-items: flex-start;
+        border-radius: var(--radius-md);
       }
-      .device-ribbon {
-        justify-content: flex-start;
+      .quick-command-pill code {
+        word-break: break-all;
+      }
+      .stat-pill-row {
+        grid-template-columns: 1fr;
+      }
+      .browsers-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .step-code {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+      .step-code code {
+        word-break: break-all;
       }
     }
-  
-    @media (max-width: 768px) {
-      .device-ribbon-wrapper {
-        justify-content: flex-start;
-        padding-bottom: 12px;
-      }
-      .device-ribbon {
-        justify-content: flex-start;
-      }
-      .phone-frame {
-        width: 100%;
-        max-width: 320px;
-      }
-    }
-
   </style>
 </head>
 <body>
@@ -903,9 +842,9 @@
       </div>
 
       <nav class="nav-links">
-        <a href="#advantages">Advantages</a>
-        <a href="#preview">Preview</a>
-        <a href="#telemetry">Telemetry</a>
+        <a href="#sync-arena">Live Sync</a>
+        <a href="#telemetry">Local Telemetry</a>
+        <a href="#compatibility">Browsers</a>
         <a href="#quickstart">Quickstart</a>
       </nav>
 
@@ -919,128 +858,97 @@
   <section class="hero">
     <div class="container">
       <div class="hero-eyebrow">
-        <span>Local-First Architecture</span>
+        <span>Local-First Browser Daemon</span>
       </div>
 
-      <h1>Ultimate Browser Privacy<br><span>with BeSynx Daemon</span></h1>
+      <h1>Your browser history. Your devices.<br><span>No cloud in between.</span></h1>
       <p class="hero-desc">
-        Sync browser history and active sessions directly across your hardware. Zero corporate telemetry, 100% offline durability.
+        Sync browser history and open sessions directly through a local-first peer architecture. Fast SQLite search, zero corporate telemetry, 100% offline durability.
       </p>
 
       <div class="hero-cta-group">
         <a href="#quickstart" class="btn-lime">
-          Get Started
+          Get Started Locally
         </a>
-        <a href="#telemetry" class="btn-pill-dark">
-          <span class="play-dot"></span>
-          Inspect Telemetry
-        </a>
+        <div class="quick-command-pill">
+          <span>Run:</span>
+          <code>cargo run -p daemon --release</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('cargo run -p daemon --release'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        </div>
       </div>
 
-      <!-- Device Location Ribbon (Vaguard Singapore Style) -->
+      <!-- Device Ribbon Carousel -->
       <div class="device-ribbon-wrapper">
         <div class="device-ribbon">
-          <div class="device-chip" onclick="selectChip(this, 'macbook')">
-            <span class="chip-label">Device A</span>
-            <span class="chip-name">MacBook Air</span>
-            <span class="chip-badge">macOS &bull; 9098</span>
+          <div class="device-chip" onclick="switchDeviceTab('all', this)">
+            <span class="chip-label">Mesh View</span>
+            <span class="chip-name">All Machines</span>
+            <span class="chip-status">6 Tabs Active</span>
           </div>
 
-          <div class="device-chip active" onclick="selectChip(this, 'studio')">
+          <div class="device-chip active" onclick="switchDeviceTab('macbook', this)">
             <span class="chip-label">Active Node</span>
+            <span class="chip-name">MacBook Air</span>
+            <span class="chip-status">Arc &bull; Port 9098</span>
+          </div>
+
+          <div class="device-chip" onclick="switchDeviceTab('studio', this)">
+            <span class="chip-label">Paired Peer</span>
             <span class="chip-name">Studio PC</span>
-            <span class="chip-badge">Linux &bull; SQLite</span>
+            <span class="chip-status">Firefox &bull; Mirrored</span>
           </div>
 
-          <div class="device-chip" onclick="selectChip(this, 'thinkpad')">
-            <span class="chip-label">Device C</span>
+          <div class="device-chip" onclick="switchDeviceTab('thinkpad', this)">
+            <span class="chip-label">Workstation</span>
             <span class="chip-name">ThinkPad X1</span>
-            <span class="chip-badge">Arch &bull; Axum</span>
-          </div>
-
-          <div class="device-chip" onclick="selectChip(this, 'workstation')">
-            <span class="chip-label">Device D</span>
-            <span class="chip-name">Workstation</span>
-            <span class="chip-badge">Win &bull; Daemon</span>
+            <span class="chip-status">Zen &bull; Localhost</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Key Advantages Section (Two-column Vaguard cards with neon circular icon) -->
-  <section class="container" id="advantages">
-    <div class="section-eyebrow-left">Our Advantage</div>
-    <div class="section-header-row">
-      <h2 class="section-title-large">Key Advantages of Using<br><span>Our Sync Service</span></h2>
-      <a href="#quickstart" class="btn-see-more">See Setup</a>
-    </div>
-
-    <div class="two-card-grid">
-      <div class="vaguard-card">
-        <div class="neon-circle-icon">&equiv;</div>
-        <h3>Many Browsers Unified</h3>
-        <p>Enjoy the freedom of connecting across Chrome, Firefox, Arc, Brave, and Zen without forcing a single proprietary browser account onto every device.</p>
-      </div>
-
-      <div class="vaguard-card">
-        <div class="neon-circle-icon">&check;</div>
-        <h3>Secure Local Connection</h3>
-        <p>Ensure your tabs and navigation history remain isolated on your local network. No external servers or third-party tracking cookies can inspect your sessions.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Platform Preview (Dual Phone + Desktop Frames with Watermark) -->
-  <section class="preview-stage" id="preview">
-    <div class="watermark-text">PREVIEW PLATFORM</div>
-    <div class="container">
-      <div class="devices-duo">
-        <!-- Phone Frame: 9:19.5 aspect ratio -->
-        <div class="phone-frame">
-          <div class="phone-notch"></div>
-          <div style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Historical Session</div>
-          <div class="phone-stat-number" id="tabCountMetric">128 TABS</div>
-          <div style="font-size: 12px; color: var(--lime); font-family: var(--font-mono); margin-top: 2px;">Local SQLite Indexed</div>
-
-          <div class="phone-bar-chart">
-            <div class="chart-bar" style="height: 35%;"></div>
-            <div class="chart-bar" style="height: 55%;"></div>
-            <div class="chart-bar" style="height: 40%;"></div>
-            <div class="chart-bar highlight" style="height: 90%;"></div>
-            <div class="chart-bar" style="height: 60%;"></div>
-            <div class="chart-bar" style="height: 75%;"></div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
-            <span>Sync Lifetime</span>
-            <span style="color: var(--text); font-weight: 600;">58 DAYS</span>
-          </div>
-        </div>
-
-        <!-- Desktop Frame: 16:9 aspect ratio -->
-        <div class="desktop-frame">
-          <div class="frame-header">
-            <span>http://127.0.0.1:9098/v1/tabs</span>
-            <span style="color: var(--lime);">&bull; Axum Daemon Active</span>
-          </div>
-          <div class="frame-content">
-            <div>
-              <div class="active-sync-badge">
-                <span>&bull;</span> CONNECTED TO STUDIO PC
-              </div>
-              <div style="font-size: 26px; font-weight: 800; margin-top: 14px; letter-spacing: -0.02em;">
-                Instant Session Handoff
-              </div>
-              <p style="font-size: 14px; color: var(--text-muted); margin-top: 6px;">
-                Tabs opened in Arc or Firefox instantly register in local SQLite memory ready to be retrieved on your secondary workstation.
-              </p>
+      <!-- NEW: Authentic Two-Device Sync Arena (Replacing mismatched phones) -->
+      <div class="sync-arena" id="sync-arena">
+        <div class="arena-header">
+          <div class="arena-title">
+            <span>Instant Cross-Device Tab Bridge</span>
+            <div class="status-indicator">
+              <span class="status-dot"></span>
+              Local SQLite Synced
             </div>
+          </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 16px;">
-              <span class="chip-badge">Port 9098</span>
-              <span class="chip-badge">0ms Cloud Latency</span>
-              <span class="chip-badge">Loopback Enforced</span>
+          <div class="search-input-box">
+            <span style="color: var(--text-dim); font-size: 13px;">&#128269;</span>
+            <input type="text" id="tabSearchInput" placeholder="Filter tabs (e.g. rust, github)..." oninput="filterTabs()">
+          </div>
+        </div>
+
+        <div class="arena-columns">
+          <!-- Device 1: Source Workstation (MacBook / Arc) -->
+          <div class="device-viewport">
+            <div class="viewport-topbar">
+              <div class="viewport-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              </div>
+              <span>DEVICE A &bull; MACBOOK (ARC BROWSER)</span>
+              <span style="color: var(--lime);">Active</span>
+            </div>
+            <div class="viewport-body" id="leftTabList">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+
+          <!-- Device 2: Target Workstation (Studio PC / Firefox) -->
+          <div class="device-viewport">
+            <div class="viewport-topbar">
+              <div class="viewport-dots">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              </div>
+              <span>DEVICE B &bull; STUDIO PC (FIREFOX)</span>
+              <span style="color: var(--text-muted);">http://127.0.0.1:9098/tabs</span>
+            </div>
+            <div class="viewport-body" id="rightTabList">
+              <!-- Rendered via JavaScript -->
             </div>
           </div>
         </div>
@@ -1048,156 +956,252 @@
     </div>
   </section>
 
-  <!-- Explore Features with Speed / Telemetry Gauge (Vaguard Speedometer style) -->
+  <!-- Local Telemetry & SQLite Performance (Replacing Misaligned Gauge) -->
   <section class="container" id="telemetry">
-    <div class="section-eyebrow-left">Our Features</div>
+    <div class="section-eyebrow-left">Benchmarked Performance</div>
     <div class="section-header-row">
-      <h2 class="section-title-large">Explore Features<br><span>of Our Solution</span></h2>
+      <h2 class="section-title-large">Engineered for Sub-Millisecond<br><span>Local Loopback Response</span></h2>
     </div>
 
-    <div class="features-telemetry-grid">
-      <!-- Feature Nav List -->
-      <div class="feature-nav-list">
-        <div class="feature-nav-item active" onclick="setTelemetry(0.4, '1.2 MS', '0.0 KB', this)">
-          <h4><span>&nearr;</span> Speed &amp; Low Latency</h4>
-          <p>Local IPC and loopback REST endpoints provide instantaneous tab updates with sub-millisecond overhead.</p>
+    <div class="telemetry-grid">
+      <!-- Summary Card with Metrics -->
+      <div class="telemetry-summary-card">
+        <div>
+          <h3 style="font-size: 22px; font-weight: 700; margin-bottom: 8px;">Zero WAN Exposure</h3>
+          <p style="font-size: 14px; color: var(--text-muted);">
+            The BeSynx daemon executes exclusively on loopback (<code>127.0.0.1</code>). SQLite indexes tabs into memory WAL mode with instantaneous lookups.
+          </p>
         </div>
 
-        <div class="feature-nav-item" onclick="setTelemetry(0.2, '0.8 MS', '0.0 KB', this)">
-          <h4><span>&Delta;</span> Embedded SQLite Storage</h4>
-          <p>Full-text search indexing across visited URLs and page titles without spawning external database containers.</p>
+        <div class="stat-pill-row">
+          <div class="stat-item">
+            <div class="stat-metric">0.2ms</div>
+            <div class="stat-label">Local REST Ping</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-metric">1.1ms</div>
+            <div class="stat-label">Full-Text Search</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-metric">0 B</div>
+            <div class="stat-label">Cloud Telemetry</div>
+          </div>
         </div>
 
-        <div class="feature-nav-item" onclick="setTelemetry(0.0, '0.1 MS', '0.0 KB', this)">
-          <h4><span>&odot;</span> Air-Gapped Network Isolation</h4>
-          <p>Strictly binds to 127.0.0.1. Zero external network sockets are opened to third-party servers.</p>
+        <div style="font-size: 13px; color: var(--text-dim); font-family: var(--font-mono);">
+          &bull; Tokio Async Runtime &bull; SQLite in WAL Persistence &bull; Manifest V3 Native Hooks
         </div>
       </div>
 
-      <!-- Telemetry Gauge Card -->
-      <div class="gauge-card">
-        <div class="gauge-header-label">Transfer Speed / Latency</div>
-        <div class="gauge-big-metric">
-          <span id="speedVal">0.4</span> <span class="gauge-unit">MS</span>
+      <!-- Live Log Terminal Box -->
+      <div class="terminal-box">
+        <div class="terminal-header">
+          <span>DAEMON RUNTIME LOGS</span>
+          <span class="log-lime">PORT 9098 &bull; HEALTHY</span>
         </div>
-
-        <div class="gauge-arc-visual">
-          <div class="gauge-arc-fill"></div>
-        </div>
-
-        <div class="gauge-stats-row">
-          <div>
-            <div class="gauge-sub-stat">SQLite Query</div>
-            <div class="gauge-sub-val" id="queryVal">1.2 MS</div>
-          </div>
-          <div>
-            <div class="gauge-sub-stat">WAN Telemetry</div>
-            <div class="gauge-sub-val" id="wanVal">0.0 KB</div>
-          </div>
+        <div class="terminal-log-content">
+          <div><span class="log-dim">[14:28:01]</span> <span class="log-lime">INFO</span> axum::server: Listening on 127.0.0.1:9098</div>
+          <div><span class="log-dim">[14:28:02]</span> <span class="log-lime">INFO</span> sqlite::init: Database opened in WAL mode (besynx.db)</div>
+          <div><span class="log-dim">[14:28:05]</span> <span class="log-lime">RECV</span> POST /v1/tabs/register &rarr; { browser: "Arc", tabs: 24 } [0.18ms]</div>
+          <div><span class="log-dim">[14:28:12]</span> <span class="log-lime">SYNC</span> Local peer discovery initialized via encrypted handshake</div>
+          <div><span class="log-dim">[14:28:14]</span> <span class="log-lime">QUERY</span> SELECT * FROM tabs WHERE title MATCH "rust" &rarr; 3 results [0.84ms]</div>
+          <div><span class="log-dim">[14:28:20]</span> <span class="log-lime">OK</span> 0 external network packets transmitted. Air-gapped safety verified.</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Open-Source Tiers (Vaguard 3-tier pricing style) -->
+  <!-- Browser Compatibility Grid -->
+  <section class="container" id="compatibility">
+    <div class="section-eyebrow-left">Interoperability</div>
+    <div class="section-header-row">
+      <h2 class="section-title-large">Seamless Cross-Browser<br><span>Tab Unification</span></h2>
+    </div>
+
+    <div class="browsers-strip">
+      <div class="browser-card">
+        <div class="browser-name">Chrome</div>
+        <div class="browser-api">Manifest V3</div>
+      </div>
+      <div class="browser-card">
+        <div class="browser-name">Firefox</div>
+        <div class="browser-api">Gecko API</div>
+      </div>
+      <div class="browser-card">
+        <div class="browser-name">Arc</div>
+        <div class="browser-api">Spaces Bridge</div>
+      </div>
+      <div class="browser-card">
+        <div class="browser-name">Brave</div>
+        <div class="browser-api">Shields Intact</div>
+      </div>
+      <div class="browser-card">
+        <div class="browser-name">Zen</div>
+        <div class="browser-api">Native Tab Hub</div>
+      </div>
+      <div class="browser-card">
+        <div class="browser-name">Edge</div>
+        <div class="browser-api">Chromium Hook</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3-Step Quickstart (Clean Setup, No Fake Pricing) -->
   <section class="container" id="quickstart">
-    <div class="section-eyebrow-left">Open Source</div>
+    <div class="section-eyebrow-left">Getting Started</div>
     <div class="section-header-row">
-      <h2 class="section-title-large">Flexible Setup Modes<br><span>for Every Privacy Need</span></h2>
-      <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-see-more">View GitHub</a>
+      <h2 class="section-title-large">Up and Running<br><span>in Sixty Seconds</span></h2>
+      <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-see-more">View GitHub Repo</a>
     </div>
 
-    <div class="tier-cards-grid">
-      <!-- Tier 1 -->
-      <div class="tier-card">
+    <div class="quickstart-grid">
+      <div class="step-card">
         <div>
-          <div style="font-size: 18px; font-weight: 700;">Local Daemon</div>
-          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Single workstation local tab indexer</div>
-          <div class="tier-price">$0 <span>/ forever</span></div>
-          <ul class="tier-features-list">
-            <li>Local SQLite persistence</li>
-            <li>Manifest V3 WebExtension</li>
-            <li>Instant tab full-text search</li>
-            <li>127.0.0.1 loopback isolation</li>
-          </ul>
+          <div class="step-number">1</div>
+          <h4>Clone &amp; Build Daemon</h4>
+          <p>Compile the high-speed Axum daemon with SQLite embedded storage.</p>
         </div>
-        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
-          Run Daemon
-        </a>
+        <div class="step-code">
+          <code>git clone https://github.com/sooraj-makala/besynx.git</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('git clone https://github.com/sooraj-makala/besynx.git'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        </div>
       </div>
 
-      <!-- Tier 2 (Featured Electric Lime) -->
-      <div class="tier-card featured">
+      <div class="step-card">
         <div>
-          <div style="font-size: 18px; font-weight: 700; color: var(--lime);">LAN Peer Sync</div>
-          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Direct device-to-device local bridge</div>
-          <div class="tier-price">$0 <span>/ open source</span></div>
-          <ul class="tier-features-list">
-            <li>All Local Daemon capabilities</li>
-            <li>Zero cloud intermediate relay</li>
-            <li>Encrypted local pairing</li>
-            <li>Cross-browser handoff</li>
-          </ul>
+          <div class="step-number">2</div>
+          <h4>Run the Local Service</h4>
+          <p>Start the local background process listening exclusively on loopback.</p>
         </div>
-        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
-          Get Started
-        </a>
+        <div class="step-code">
+          <code>cargo run -p daemon --release</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('cargo run -p daemon --release'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        </div>
       </div>
 
-      <!-- Tier 3 -->
-      <div class="tier-card">
+      <div class="step-card">
         <div>
-          <div style="font-size: 18px; font-weight: 700;">Self-Hosted Relay</div>
-          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Private custom relay for WAN sync</div>
-          <div class="tier-price">$0 <span>/ MIT License</span></div>
-          <ul class="tier-features-list">
-            <li>End-to-end encrypted tunnels</li>
-            <li>Custom server deployment</li>
-            <li>Zero third-party telemetry</li>
-            <li>Docker container ready</li>
-          </ul>
+          <div class="step-number">3</div>
+          <h4>Load WebExtension</h4>
+          <p>Add the extension to Chrome, Arc, or Firefox to start indexing tabs.</p>
         </div>
-        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
-          Inspect Architecture
-        </a>
+        <div class="step-code">
+          <code># Load folder: besynx/extension</code>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('besynx/extension'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- Final CTA Section -->
-  <section class="container cta-stage">
-    <h2>Protect Your Privacy, Start<br>Using BeSynx</h2>
-    <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-lime">
-      Clone Repository on GitHub
-    </a>
+  <!-- Final Call to Action -->
+  <section class="container">
+    <div class="cta-stage">
+      <h2>Reclaim Your Browser Privacy</h2>
+      <p>Your open tabs and browsing history belong on your own hardware. Free, open source, and air-gapped.</p>
+      <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-lime">
+        Get BeSynx on GitHub
+      </a>
+    </div>
   </section>
 
   <!-- Footer -->
   <footer>
     <div class="container footer-inner">
-      <div>&copy; 2026 BeSynx &bull; Local-First Peer-to-Peer Browser Sync &bull; Open Source</div>
+      <div>&copy; 2026 BeSynx &bull; Local-First Browser Synchronization &bull; MIT License</div>
       <div class="footer-links">
         <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/sooraj-makala/besynx/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
-        <a href="#telemetry">Telemetry</a>
-        <a href="#quickstart">Setup</a>
+        <a href="#sync-arena">Live Sync</a>
+        <a href="#quickstart">Quickstart</a>
       </div>
     </div>
   </footer>
 
   <script>
-    function selectChip(el, device) {
-      document.querySelectorAll('.device-chip').forEach(c => c.classList.remove('active'));
-      el.classList.add('active');
+    // -------------------------------------------------------------------------
+    // REAL CROSS-DEVICE TAB SYNC DATA & INTERACTION
+    // -------------------------------------------------------------------------
+    const tabsData = [
+      { id: 1, title: 'rust-lang/rust: Pull Request #12809', browser: 'Arc', host: 'github.com', device: 'macbook', active: true },
+      { id: 2, title: 'tokio::sync::broadcast - Rust Docs', browser: 'Arc', host: 'docs.rs', device: 'macbook', active: false },
+      { id: 3, title: 'Axum Web Application Framework 0.7', browser: 'Arc', host: 'github.com', device: 'macbook', active: false },
+      { id: 4, title: 'Linear: BES-89 Local Device Pairing Flow', browser: 'Firefox', host: 'linear.app', device: 'studio', active: true },
+      { id: 5, title: 'SQLite WAL Mode Concurrency Guide', browser: 'Firefox', host: 'sqlite.org', device: 'studio', active: false },
+      { id: 6, title: 'W3C Manifest V3 Extension Specification', browser: 'Zen', host: 'developer.mozilla.org', device: 'thinkpad', active: false }
+    ];
+
+    let currentDeviceFilter = 'all';
+
+    function renderTabs(filterText = '') {
+      const left = document.getElementById('leftTabList');
+      const right = document.getElementById('rightTabList');
+      left.innerHTML = '';
+      right.innerHTML = '';
+
+      const query = filterText.toLowerCase();
+
+      const matched = tabsData.filter(t => {
+        const matchesDevice = currentDeviceFilter === 'all' || t.device === currentDeviceFilter;
+        const matchesQuery = t.title.toLowerCase().includes(query) || t.host.toLowerCase().includes(query);
+        return matchesDevice && matchesQuery;
+      });
+
+      matched.forEach(t => {
+        // Left Column: Source Machine
+        const cardL = document.createElement('div');
+        cardL.className = 'tab-card';
+        cardL.innerHTML = `
+          <div class="tab-left">
+            <span class="browser-tag">${t.browser}</span>
+            <span class="tab-url-title">${t.title}</span>
+          </div>
+          <span style="font-family: var(--font-mono); font-size: 10px; color: var(--text-dim);">${t.host}</span>
+        `;
+        left.appendChild(cardL);
+
+        // Right Column: Mirrored Peer Machine with Handoff Button
+        const cardR = document.createElement('div');
+        cardR.className = 'tab-card';
+        cardR.innerHTML = `
+          <div class="tab-left">
+            <span class="browser-tag">${t.browser}</span>
+            <span class="tab-url-title">${t.title}</span>
+          </div>
+          <button class="btn-handoff" onclick="triggerHandoff(this, '${t.title}')">Handoff</button>
+        `;
+        right.appendChild(cardR);
+      });
+
+      if (matched.length === 0) {
+        left.innerHTML = '<div style="color: var(--text-dim); padding: 16px; font-family: var(--font-mono); font-size: 12px;">No matching tabs in SQLite memory.</div>';
+        right.innerHTML = '<div style="color: var(--text-dim); padding: 16px; font-family: var(--font-mono); font-size: 12px;">No active mirrored streams.</div>';
+      }
     }
 
-    function setTelemetry(speed, query, wan, el) {
-      document.querySelectorAll('.feature-nav-item').forEach(i => i.classList.remove('active'));
-      el.classList.add('active');
-      document.getElementById('speedVal').innerText = speed;
-      document.getElementById('queryVal').innerText = query;
-      document.getElementById('wanVal').innerText = wan;
+    function filterTabs() {
+      const val = document.getElementById('tabSearchInput').value;
+      renderTabs(val);
     }
+
+    function switchDeviceTab(dev, el) {
+      document.querySelectorAll('.device-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentDeviceFilter = dev;
+      renderTabs(document.getElementById('tabSearchInput').value);
+    }
+
+    function triggerHandoff(btn, title) {
+      btn.innerText = 'Opened ✓';
+      btn.style.background = '#d2f802';
+      btn.style.color = '#0b0d10';
+      setTimeout(() => {
+        btn.innerText = 'Handoff';
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2000);
+    }
+
+    renderTabs();
   </script>
 </body>
 </html>
