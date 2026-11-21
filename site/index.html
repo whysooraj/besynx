@@ -4,32 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>BeSynx — Local-First Peer-to-Peer Browser Sync</title>
-  <meta name="description" content="Sync browser history and active sessions across your devices through a local-first architecture. Your data stays under your control. Zero cloud in between.">
+  <meta name="description" content="Sync browser history and active sessions across your devices through a local-first peer-to-peer architecture. Your data stays under your control. Zero cloud in between.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* -------------------------------------------------------------------------
+       VAGUARD INSPIRED DESIGN SYSTEM FOR BESYNX
+       Deep Obsidian Charcoal (#0b0d10) + Electric Lime (#d2f802 / #c4f100)
+       Sleek dark glass cards, circular neon icon badges, device carousel ribbon
+       ------------------------------------------------------------------------- */
     :root {
-      --bg: #0c0d10;
-      --bg-subtle: #121419;
-      --bg-surface: #161920;
-      --bg-surface-hover: #1c202a;
-      --border: #232733;
-      --border-subtle: #1a1e28;
-      --border-focus: #2dd4bf;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-dim: #64748b;
-      --teal: #2dd4bf;
-      --teal-dim: #14b8a6;
-      --teal-subtle: rgba(45, 212, 191, 0.1);
-      --teal-border: rgba(45, 212, 191, 0.25);
-      --lime: #a3e635;
-      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --bg: #0a0c0f;
+      --bg-surface: #11141a;
+      --bg-card: rgba(18, 22, 29, 0.75);
+      --bg-card-hover: rgba(24, 30, 40, 0.85);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --border-focus: #d2f802;
+      
+      --lime: #d2f802;
+      --lime-hover: #bde000;
+      --lime-glow: rgba(210, 248, 2, 0.18);
+      --lime-subtle: rgba(210, 248, 2, 0.08);
+      --lime-border: rgba(210, 248, 2, 0.3);
+      
+      --text: #ffffff;
+      --text-muted: #8e95a5;
+      --text-dim: #555c6d;
+      
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      --max-w: 1160px;
-      --radius: 8px;
+      
+      --max-w: 1140px;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 22px;
+      --radius-full: 9999px;
     }
 
     * {
@@ -53,6 +65,9 @@
       display: flex;
       flex-direction: column;
       overflow-x: hidden;
+      background: radial-gradient(circle at 50% -10%, rgba(210, 248, 2, 0.08) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 30%, rgba(20, 24, 32, 0.5) 0%, transparent 40%),
+                  var(--bg);
     }
 
     a {
@@ -67,44 +82,54 @@
       padding: 0 24px;
     }
 
-    /* Header & Navigation */
+    /* -------------------------------------------------------------------------
+       NAVBAR (Floating Pill Header - Vaguard style)
+       ------------------------------------------------------------------------- */
     header {
       position: sticky;
-      top: 0;
-      z-index: 50;
-      background: rgba(12, 13, 16, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 1px solid var(--border-subtle);
+      top: 18px;
+      z-index: 100;
+      padding: 0 24px;
+      margin-bottom: 24px;
     }
 
-    .nav-inner {
-      height: 64px;
+    .nav-pill {
+      background: rgba(14, 17, 23, 0.85);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      padding: 0 16px 0 14px;
+      max-width: var(--max-w);
+      margin: 0 auto;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
     }
 
     .brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 16px;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
     }
 
     .brand-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
       display: block;
     }
 
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 28px;
       font-size: 14px;
+      font-weight: 500;
       color: var(--text-muted);
     }
 
@@ -112,487 +137,689 @@
       color: var(--text);
     }
 
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      background: var(--teal-subtle);
-      color: var(--teal);
-      border: 1px solid var(--teal-border);
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--teal);
-    }
-
-    .btn-github {
-      padding: 6px 14px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg-surface);
+    .nav-cta-btn {
+      padding: 8px 20px;
+      border-radius: var(--radius-full);
+      background: var(--text);
+      color: #0b0d10 !important;
       font-size: 13px;
-      font-weight: 500;
-      color: var(--text);
-      transition: background 0.15s, border-color 0.15s;
+      font-weight: 700;
+      transition: background 0.15s, transform 0.1s;
     }
 
-    .btn-github:hover {
-      background: var(--bg-surface-hover);
-      border-color: var(--border-focus);
+    .nav-cta-btn:hover {
+      background: var(--lime);
+      transform: translateY(-1px);
     }
 
-    /* Hero Section */
+    /* -------------------------------------------------------------------------
+       HERO (Centered Vaguard headline + Dual CTA buttons)
+       ------------------------------------------------------------------------- */
     .hero {
-      padding: 80px 0 64px;
-      border-bottom: 1px solid var(--border-subtle);
+      padding: 60px 0 64px;
+      text-align: center;
     }
 
     .hero-eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      font-family: var(--font-mono);
       font-size: 12px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--teal);
+      letter-spacing: 0.1em;
+      color: var(--lime);
       margin-bottom: 20px;
     }
 
     .hero h1 {
-      font-size: 46px;
-      line-height: 1.15;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      max-width: 820px;
-      margin-bottom: 20px;
+      font-size: 56px;
+      line-height: 1.1;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      max-width: 840px;
+      margin: 0 auto 20px;
+      color: var(--text);
     }
 
-    .hero p {
-      font-size: 18px;
+    .hero h1 span {
       color: var(--text-muted);
-      max-width: 720px;
+      font-weight: 600;
+    }
+
+    .hero-desc {
+      font-size: 18px;
       line-height: 1.6;
-      margin-bottom: 32px;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 36px;
     }
 
-    .hero-actions {
+    .hero-cta-group {
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
+      justify-content: center;
       gap: 16px;
-      margin-bottom: 48px;
+      margin-bottom: 56px;
+      flex-wrap: wrap;
     }
 
-    .btn-primary {
+    .btn-lime {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 20px;
-      border-radius: 6px;
-      background: var(--teal-dim);
-      color: #0c0d10;
+      padding: 14px 28px;
+      border-radius: var(--radius-full);
+      background: var(--lime);
+      color: #0b0d10 !important;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 24px var(--lime-glow);
+      transition: all 0.15s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-lime:hover {
+      background: var(--lime-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--lime-glow);
+    }
+
+    .btn-pill-dark {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 24px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
       font-size: 14px;
       font-weight: 600;
-      border: 1px solid transparent;
-      transition: background 0.15s;
+      transition: border-color 0.15s, background 0.15s;
     }
 
-    .btn-primary:hover {
-      background: var(--teal);
+    .btn-pill-dark:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .quick-command {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 16px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: var(--text);
-    }
-
-    .quick-command code {
-      color: var(--teal);
-    }
-
-    .btn-copy {
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 12px;
-      padding: 2px 6px;
-      border-radius: 4px;
-      transition: color 0.15s;
-    }
-
-    .btn-copy:hover {
-      color: var(--text);
-    }
-
-    /* Device Sync Interactive Showcase */
-    .showcase-box {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-      margin-top: 24px;
-    }
-
-    .showcase-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg-surface);
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .device-switcher {
-      display: flex;
-      gap: 8px;
-    }
-
-    .device-pill {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .device-pill.active {
-      background: var(--teal-subtle);
-      border-color: var(--teal-border);
-      color: var(--text);
-      font-weight: 600;
-    }
-
-    .sync-status-indicator {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .sync-live-dot {
+    .play-dot {
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 8px rgba(45, 212, 191, 0.4);
+      background: var(--lime);
     }
 
-    .showcase-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      divide-x: 1px solid var(--border);
+    /* -------------------------------------------------------------------------
+       DEVICE / LOCATION HORIZONTAL RIBBON (Vaguard Singapore Highlight style)
+       ------------------------------------------------------------------------- */
+    .device-ribbon-wrapper {
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      max-width: 980px;
+      margin: 0 auto 72px;
+      overflow-x: auto;
+      padding: 12px 4px;
     }
 
-    .device-mockup {
-      padding: 24px;
-      border-right: 1px solid var(--border);
+    .device-ribbon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      width: max-content;
+      max-width: 100%;
     }
 
-    .device-mockup:last-child {
-      border-right: none;
-    }
-
-    .browser-window {
-      background: #0f1116;
+    .device-chip {
+      background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      overflow: hidden;
-      aspect-ratio: 16 / 9;
+      border-radius: var(--radius-md);
+      padding: 14px 22px;
       display: flex;
       flex-direction: column;
-    }
-
-    .browser-chrome {
-      height: 38px;
-      background: #151821;
-      border-bottom: 1px solid var(--border-subtle);
-      display: flex;
       align-items: center;
-      padding: 0 12px;
-      gap: 8px;
-    }
-
-    .browser-dots {
-      display: flex;
       gap: 6px;
+      min-width: 130px;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: #2b303d;
+    .device-chip:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-2px);
     }
 
-    .address-bar {
-      flex: 1;
-      height: 24px;
-      background: #0c0d10;
-      border-radius: 4px;
-      border: 1px solid var(--border-subtle);
-      display: flex;
-      align-items: center;
-      padding: 0 8px;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
+    .device-chip.active {
+      background: var(--lime);
+      color: #0b0d10 !important;
+      border-color: var(--lime);
+      box-shadow: 0 8px 30px var(--lime-glow);
+      transform: scale(1.04);
     }
 
-    .browser-content {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .device-chip.active .chip-label {
+      color: rgba(11, 13, 16, 0.65);
     }
 
-    .tab-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 12px;
-      background: #141720;
-      border: 1px solid var(--border-subtle);
-      border-radius: 4px;
-      font-size: 12px;
-      transition: border-color 0.15s;
+    .device-chip.active .chip-name {
+      color: #0b0d10;
+      font-weight: 800;
     }
 
-    .tab-row:hover {
-      border-color: var(--teal-border);
-    }
-
-    .tab-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 500;
-    }
-
-    .tab-tag {
-      font-family: var(--font-mono);
+    .chip-label {
       font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       color: var(--text-dim);
     }
 
-    .btn-handoff {
-      font-size: 11px;
+    .chip-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .chip-badge {
       font-family: var(--font-mono);
-      padding: 3px 8px;
+      font-size: 10px;
+      padding: 2px 6px;
       border-radius: 4px;
-      background: var(--teal-subtle);
-      border: 1px solid var(--teal-border);
-      color: var(--teal);
-      cursor: pointer;
-    }
-
-    /* Section Headers */
-    .section {
-      padding: 80px 0;
-      border-bottom: 1px solid var(--border-subtle);
-    }
-
-    .section-eyebrow {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--teal);
-      margin-bottom: 12px;
-    }
-
-    .section-title {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin-bottom: 16px;
-    }
-
-    .section-desc {
-      font-size: 16px;
+      background: rgba(255, 255, 255, 0.06);
       color: var(--text-muted);
-      max-width: 680px;
-      margin-bottom: 48px;
-      line-height: 1.6;
     }
 
-    /* Architecture Features Grid */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 24px;
+    .device-chip.active .chip-badge {
+      background: rgba(11, 13, 16, 0.15);
+      color: #0b0d10;
     }
 
-    .feature-item {
+    /* -------------------------------------------------------------------------
+       KEY ADVANTAGES (Two-column Vaguard cards with circular neon icon)
+       ------------------------------------------------------------------------- */
+    .section-eyebrow-left {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--lime);
+      margin-bottom: 8px;
+    }
+
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .section-title-large {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .section-title-large span {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-see-more {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: var(--radius-full);
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 28px;
+      color: var(--text-muted);
+      transition: all 0.15s;
     }
 
-    .feature-tag {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--teal);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+    .btn-see-more:hover {
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.2);
     }
 
-    .feature-item h3 {
-      font-size: 18px;
-      font-weight: 600;
+    .two-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 96px;
+    }
+
+    .vaguard-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 38px 32px;
+      backdrop-filter: blur(12px);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .vaguard-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .neon-circle-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--lime);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0b0d10;
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 20px var(--lime-glow);
+    }
+
+    .vaguard-card h3 {
+      font-size: 22px;
+      font-weight: 700;
       margin-bottom: 12px;
       letter-spacing: -0.01em;
     }
 
-    .feature-item p {
-      font-size: 14px;
+    .vaguard-card p {
+      font-size: 15px;
       color: var(--text-muted);
       line-height: 1.6;
     }
 
-    /* Compatibility Table */
-    .table-container {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow-x: auto;
+    /* -------------------------------------------------------------------------
+       PLATFORM PREVIEW (Dual Phone / Laptop Mockup Frame - Vaguard style)
+       ------------------------------------------------------------------------- */
+    .preview-stage {
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at center, rgba(210, 248, 2, 0.05) 0%, transparent 70%);
+      padding: 40px 0 80px;
+      text-align: center;
     }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-      font-size: 14px;
+    .watermark-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 110px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.02);
+      letter-spacing: -0.04em;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    th {
-      background: var(--bg-surface);
-      padding: 14px 20px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-dim);
-      border-bottom: 1px solid var(--border);
-    }
-
-    td {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border-subtle);
-      font-size: 14px;
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    .pill-browser {
-      font-weight: 500;
-      color: var(--text);
-    }
-
-    .pill-status {
-      display: inline-flex;
+    .devices-duo {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
       align-items: center;
-      gap: 6px;
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--teal);
+      gap: 32px;
+      flex-wrap: wrap;
     }
 
-    /* Setup Steps */
-    .steps-list {
+    /* Device Card 1: Session Stats Phone (9:19.5 aspect ratio) */
+    .phone-frame {
+      width: 300px;
+      aspect-ratio: 9 / 19.5;
+      background: #0f1218;
+      border: 1px solid var(--border);
+      border-radius: 36px;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      text-align: left;
     }
 
-    .step-card {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      display: grid;
-      grid-template-columns: 48px 1fr;
-      gap: 20px;
+    .phone-notch {
+      width: 70px;
+      height: 18px;
+      background: #181d26;
+      border-radius: var(--radius-full);
+      margin: 0 auto 20px;
     }
 
-    .step-num {
-      width: 40px;
-      height: 40px;
-      border-radius: 6px;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--font-mono);
-      font-weight: 600;
-      color: var(--teal);
-    }
-
-    .step-content h4 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .step-content p {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-
-    .step-cmd {
-      background: #0f1116;
-      border: 1px solid var(--border-subtle);
-      border-radius: 6px;
-      padding: 12px 16px;
-      font-family: var(--font-mono);
-      font-size: 13px;
+    .phone-stat-number {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
       color: var(--text);
+      font-family: var(--font-mono);
+      margin-top: 6px;
+    }
+
+    .phone-bar-chart {
+      height: 120px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      margin: 24px 0;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    .chart-bar.highlight {
+      background: var(--lime);
+      box-shadow: 0 0 16px var(--lime-glow);
+    }
+
+    /* Device Card 2: Active Connection Laptop / Browser (16:9 aspect ratio) */
+    .desktop-frame {
+      width: 520px;
+      aspect-ratio: 16 / 9;
+      background: #0f1218;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      text-align: left;
+    }
+
+    .frame-header {
+      height: 42px;
+      background: #151a22;
+      border-bottom: 1px solid var(--border-subtle);
       display: flex;
       align-items: center;
+      padding: 0 16px;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .frame-content {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
       justify-content: space-between;
     }
 
-    /* Footer */
+    .active-sync-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--lime);
+      background: var(--lime-subtle);
+      border: 1px solid var(--lime-border);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      width: fit-content;
+    }
+
+    /* -------------------------------------------------------------------------
+       EXPLORE FEATURES WITH SPEED / TELEMETRY GAUGE (Vaguard Speedometer style)
+       ------------------------------------------------------------------------- */
+    .features-telemetry-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+      margin: 80px 0;
+    }
+
+    .feature-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: left;
+    }
+
+    .feature-nav-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 22px 24px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .feature-nav-item:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .feature-nav-item.active {
+      border-color: var(--lime);
+      background: rgba(210, 248, 2, 0.04);
+    }
+
+    .feature-nav-item.active h4 {
+      color: var(--lime);
+    }
+
+    .feature-nav-item h4 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-nav-item p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Speedometer Telemetry Card */
+    .gauge-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px 32px;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .gauge-header-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .gauge-big-metric {
+      font-size: 58px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      font-family: var(--font-mono);
+      color: var(--text);
+    }
+
+    .gauge-unit {
+      font-size: 16px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .gauge-arc-visual {
+      width: 180px;
+      height: 90px;
+      margin: 24px auto;
+      border-top-left-radius: 90px;
+      border-top-right-radius: 90px;
+      border: 14px solid rgba(255, 255, 255, 0.06);
+      border-bottom: 0;
+      position: relative;
+    }
+
+    .gauge-arc-fill {
+      position: absolute;
+      inset: -14px;
+      border-top-left-radius: 90px;
+      border-top-right-radius: 90px;
+      border: 14px solid var(--lime);
+      border-bottom: 0;
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+      transform: rotate(-35deg);
+    }
+
+    .gauge-stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+    }
+
+    .gauge-sub-stat {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .gauge-sub-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 4px;
+    }
+
+    /* -------------------------------------------------------------------------
+       OPEN-SOURCE TIERS / PRICING (Vaguard 3-tier card style with center highlight)
+       ------------------------------------------------------------------------- */
+    .tier-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin: 48px 0 96px;
+      text-align: left;
+    }
+
+    .tier-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s;
+    }
+
+    .tier-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .tier-card.featured {
+      background: #141820;
+      border-color: var(--lime-border);
+      box-shadow: 0 12px 40px var(--lime-glow);
+      position: relative;
+    }
+
+    .tier-price {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin: 16px 0;
+      color: var(--text);
+    }
+
+    .tier-price span {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .tier-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .tier-features-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tier-features-list li::before {
+      content: "✓";
+      color: var(--lime);
+      font-weight: 700;
+    }
+
+    .btn-tier {
+      width: 100%;
+      padding: 12px;
+      border-radius: var(--radius-full);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      transition: all 0.15s;
+    }
+
+    .btn-tier:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tier-card.featured .btn-tier {
+      background: var(--lime);
+      color: #0b0d10;
+      border: none;
+    }
+
+    .tier-card.featured .btn-tier:hover {
+      background: var(--lime-hover);
+    }
+
+    /* -------------------------------------------------------------------------
+       FINAL CTA & FOOTER
+       ------------------------------------------------------------------------- */
+    .cta-stage {
+      text-align: center;
+      padding: 80px 0 60px;
+    }
+
+    .cta-stage h2 {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+    }
+
     footer {
       padding: 48px 0;
       border-top: 1px solid var(--border-subtle);
-      background: var(--bg-subtle);
       font-size: 13px;
       color: var(--text-dim);
     }
@@ -607,213 +834,213 @@
 
     .footer-links {
       display: flex;
-      gap: 20px;
+      gap: 24px;
     }
 
     .footer-links a:hover {
       color: var(--text);
     }
 
-    /* Responsive Ratios */
-    @media (max-width: 900px) {
-      .showcase-grid {
+    /* -------------------------------------------------------------------------
+       RESPONSIVE BREAKPOINTS (Desktop 16:9, Laptop 16:9, Tablet 4:3, Mobile 9:19.5)
+       ------------------------------------------------------------------------- */
+    @media (max-width: 960px) {
+      .two-card-grid, .features-telemetry-grid, .tier-cards-grid {
         grid-template-columns: 1fr;
       }
-      .device-mockup {
-        border-right: none;
-        border-bottom: 1px solid var(--border);
-      }
-      .features-grid {
-        grid-template-columns: 1fr;
+      .desktop-frame {
+        width: 100%;
+        max-width: 520px;
       }
       .hero h1 {
-        font-size: 34px;
+        font-size: 40px;
       }
     }
 
-    @media (max-width: 450px) {
-      .browser-window {
-        aspect-ratio: 9 / 19.5;
-      }
-    }
-  
-    /* Strict Mobile Viewport (9:19.5) Fixes */
     @media (max-width: 768px) {
-      .nav-links a:not(.btn-github) {
-        display: none;
-      }
       .nav-links {
-        gap: 8px;
-      }
-      .status-badge {
-        font-size: 11px;
-        padding: 3px 8px;
-      }
-      .status-badge span:not(.status-dot) {
         display: none;
       }
-      .quick-command {
-        max-width: 100%;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-        word-break: break-all;
+      .hero h1 {
+        font-size: 32px;
       }
-      .quick-command code {
-        word-break: break-all;
-        white-space: pre-wrap;
-      }
-      .step-card {
-        grid-template-columns: 1fr;
-        gap: 12px;
-      }
-      .step-cmd {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-        word-break: break-all;
-      }
-      .step-cmd code {
-        word-break: break-all;
-        white-space: pre-wrap;
-      }
-      .code-block {
-        word-break: break-all;
-        white-space: pre-wrap;
-      }
-      .hero-actions {
+      .hero-cta-group {
         flex-direction: column;
         align-items: stretch;
       }
-      .btn-primary {
+      .btn-lime, .btn-pill-dark {
         justify-content: center;
+      }
+      .device-ribbon {
+        justify-content: flex-start;
       }
     }
   
+    @media (max-width: 768px) {
+      .device-ribbon-wrapper {
+        justify-content: flex-start;
+        padding-bottom: 12px;
+      }
+      .device-ribbon {
+        justify-content: flex-start;
+      }
+      .phone-frame {
+        width: 100%;
+        max-width: 320px;
+      }
+    }
+
   </style>
 </head>
 <body>
 
-  <!-- Navigation -->
+  <!-- Floating Nav Pill -->
   <header>
-    <div class="container nav-inner">
+    <div class="nav-pill">
       <div class="brand">
         <img src="favicon.svg" alt="BeSynx Logo" class="brand-icon">
         <span>BeSynx</span>
       </div>
-      <div class="nav-links">
-        <span class="status-badge">
-          <span class="status-dot"></span>
-          Daemon Ready (127.0.0.1:9098)
-        </span>
-        <a href="#demo">Live Demo</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#compatibility">Compatibility</a>
-        <a href="#setup">Setup</a>
-        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-github">GitHub</a>
-      </div>
+
+      <nav class="nav-links">
+        <a href="#advantages">Advantages</a>
+        <a href="#preview">Preview</a>
+        <a href="#telemetry">Telemetry</a>
+        <a href="#quickstart">Quickstart</a>
+      </nav>
+
+      <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="nav-cta-btn">
+        GitHub
+      </a>
     </div>
   </header>
 
   <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <div class="hero-eyebrow">Local-First Synchronization</div>
-      <h1>Your browser history. Your devices. No cloud in between.</h1>
-      <p>Sync browser history and sessions across your devices through a local-first peer-to-peer architecture. Your data stays on your hardware under your control.</p>
-
-      <div class="hero-actions">
-        <a href="#setup" class="btn-primary">Get Started Locally</a>
-        <div class="quick-command">
-          <span>Daemon:</span>
-          <code>cargo run -p daemon --release</code>
-          <button class="btn-copy" onclick="navigator.clipboard.writeText('cargo run -p daemon --release'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
-        </div>
+      <div class="hero-eyebrow">
+        <span>Local-First Architecture</span>
       </div>
 
-      <!-- Live Sync Showcase -->
-      <div class="showcase-box" id="demo">
-        <div class="showcase-header">
-          <div class="device-switcher">
-            <button class="device-pill active" onclick="switchDevice('macbook', this)">MacBook Air (Laptop)</button>
-            <button class="device-pill" onclick="switchDevice('desktop', this)">Studio PC (Desktop)</button>
+      <h1>Ultimate Browser Privacy<br><span>with BeSynx Daemon</span></h1>
+      <p class="hero-desc">
+        Sync browser history and active sessions directly across your hardware. Zero corporate telemetry, 100% offline durability.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#quickstart" class="btn-lime">
+          Get Started
+        </a>
+        <a href="#telemetry" class="btn-pill-dark">
+          <span class="play-dot"></span>
+          Inspect Telemetry
+        </a>
+      </div>
+
+      <!-- Device Location Ribbon (Vaguard Singapore Style) -->
+      <div class="device-ribbon-wrapper">
+        <div class="device-ribbon">
+          <div class="device-chip" onclick="selectChip(this, 'macbook')">
+            <span class="chip-label">Device A</span>
+            <span class="chip-name">MacBook Air</span>
+            <span class="chip-badge">macOS &bull; 9098</span>
           </div>
-          <div class="sync-status-indicator">
-            <span class="sync-live-dot"></span>
-            <span>Local SQLite Session Synced</span>
+
+          <div class="device-chip active" onclick="selectChip(this, 'studio')">
+            <span class="chip-label">Active Node</span>
+            <span class="chip-name">Studio PC</span>
+            <span class="chip-badge">Linux &bull; SQLite</span>
+          </div>
+
+          <div class="device-chip" onclick="selectChip(this, 'thinkpad')">
+            <span class="chip-label">Device C</span>
+            <span class="chip-name">ThinkPad X1</span>
+            <span class="chip-badge">Arch &bull; Axum</span>
+          </div>
+
+          <div class="device-chip" onclick="selectChip(this, 'workstation')">
+            <span class="chip-label">Device D</span>
+            <span class="chip-name">Workstation</span>
+            <span class="chip-badge">Win &bull; Daemon</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Advantages Section (Two-column Vaguard cards with neon circular icon) -->
+  <section class="container" id="advantages">
+    <div class="section-eyebrow-left">Our Advantage</div>
+    <div class="section-header-row">
+      <h2 class="section-title-large">Key Advantages of Using<br><span>Our Sync Service</span></h2>
+      <a href="#quickstart" class="btn-see-more">See Setup</a>
+    </div>
+
+    <div class="two-card-grid">
+      <div class="vaguard-card">
+        <div class="neon-circle-icon">&equiv;</div>
+        <h3>Many Browsers Unified</h3>
+        <p>Enjoy the freedom of connecting across Chrome, Firefox, Arc, Brave, and Zen without forcing a single proprietary browser account onto every device.</p>
+      </div>
+
+      <div class="vaguard-card">
+        <div class="neon-circle-icon">&check;</div>
+        <h3>Secure Local Connection</h3>
+        <p>Ensure your tabs and navigation history remain isolated on your local network. No external servers or third-party tracking cookies can inspect your sessions.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Platform Preview (Dual Phone + Desktop Frames with Watermark) -->
+  <section class="preview-stage" id="preview">
+    <div class="watermark-text">PREVIEW PLATFORM</div>
+    <div class="container">
+      <div class="devices-duo">
+        <!-- Phone Frame: 9:19.5 aspect ratio -->
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <div style="font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase;">Historical Session</div>
+          <div class="phone-stat-number" id="tabCountMetric">128 TABS</div>
+          <div style="font-size: 12px; color: var(--lime); font-family: var(--font-mono); margin-top: 2px;">Local SQLite Indexed</div>
+
+          <div class="phone-bar-chart">
+            <div class="chart-bar" style="height: 35%;"></div>
+            <div class="chart-bar" style="height: 55%;"></div>
+            <div class="chart-bar" style="height: 40%;"></div>
+            <div class="chart-bar highlight" style="height: 90%;"></div>
+            <div class="chart-bar" style="height: 60%;"></div>
+            <div class="chart-bar" style="height: 75%;"></div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted);">
+            <span>Sync Lifetime</span>
+            <span style="color: var(--text); font-weight: 600;">58 DAYS</span>
           </div>
         </div>
 
-        <div class="showcase-grid">
-          <!-- Device 1: Laptop -->
-          <div class="device-mockup">
-            <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
-              <span>DEVICE A: MACBOOK AIR</span>
-              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--teal);">ACTIVE WORKSPACE</span>
-            </div>
-            <div class="browser-window">
-              <div class="browser-chrome">
-                <div class="browser-dots">
-                  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                </div>
-                <div class="address-bar">https://github.com/pulls</div>
-              </div>
-              <div class="browser-content" id="leftTabs">
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>Pull Requests &bull; BeSynx Core</span>
-                  </div>
-                  <span class="tab-tag">Arc / 2m ago</span>
-                </div>
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>SQLite Storage Schema Docs</span>
-                  </div>
-                  <span class="tab-tag">Arc / 8m ago</span>
-                </div>
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>Tokio Axum Server Reference</span>
-                  </div>
-                  <span class="tab-tag">Arc / 14m ago</span>
-                </div>
-              </div>
-            </div>
+        <!-- Desktop Frame: 16:9 aspect ratio -->
+        <div class="desktop-frame">
+          <div class="frame-header">
+            <span>http://127.0.0.1:9098/v1/tabs</span>
+            <span style="color: var(--lime);">&bull; Axum Daemon Active</span>
           </div>
-
-          <!-- Device 2: Studio Desktop -->
-          <div class="device-mockup">
-            <div style="font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text-muted); display: flex; justify-content: space-between;">
-              <span>DEVICE B: STUDIO PC</span>
-              <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">MIRROR INSTANCE</span>
+          <div class="frame-content">
+            <div>
+              <div class="active-sync-badge">
+                <span>&bull;</span> CONNECTED TO STUDIO PC
+              </div>
+              <div style="font-size: 26px; font-weight: 800; margin-top: 14px; letter-spacing: -0.02em;">
+                Instant Session Handoff
+              </div>
+              <p style="font-size: 14px; color: var(--text-muted); margin-top: 6px;">
+                Tabs opened in Arc or Firefox instantly register in local SQLite memory ready to be retrieved on your secondary workstation.
+              </p>
             </div>
-            <div class="browser-window">
-              <div class="browser-chrome">
-                <div class="browser-dots">
-                  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                </div>
-                <div class="address-bar">http://127.0.0.1:9098/tabs</div>
-              </div>
-              <div class="browser-content" id="rightTabs">
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>Pull Requests &bull; BeSynx Core</span>
-                  </div>
-                  <button class="btn-handoff" onclick="handoffTab(this)">Handoff Here</button>
-                </div>
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>SQLite Storage Schema Docs</span>
-                  </div>
-                  <button class="btn-handoff" onclick="handoffTab(this)">Handoff Here</button>
-                </div>
-                <div class="tab-row">
-                  <div class="tab-title">
-                    <span>Tokio Axum Server Reference</span>
-                  </div>
-                  <button class="btn-handoff" onclick="handoffTab(this)">Handoff Here</button>
-                </div>
-              </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+              <span class="chip-badge">Port 9098</span>
+              <span class="chip-badge">0ms Cloud Latency</span>
+              <span class="chip-badge">Loopback Enforced</span>
             </div>
           </div>
         </div>
@@ -821,151 +1048,155 @@
     </div>
   </section>
 
-  <!-- Architecture & How It Works -->
-  <section class="section" id="architecture">
-    <div class="container">
-      <div class="section-eyebrow">Technical Architecture</div>
-      <h2 class="section-title">Local-first privacy, by design</h2>
-      <p class="section-desc">Traditional sync solutions route every URL you visit through corporate telemetry clouds. BeSynx isolates all browser session indexing inside a local Rust daemon.</p>
+  <!-- Explore Features with Speed / Telemetry Gauge (Vaguard Speedometer style) -->
+  <section class="container" id="telemetry">
+    <div class="section-eyebrow-left">Our Features</div>
+    <div class="section-header-row">
+      <h2 class="section-title-large">Explore Features<br><span>of Our Solution</span></h2>
+    </div>
 
-      <div class="features-grid">
-        <div class="feature-item">
-          <div class="feature-tag">Local Engine</div>
-          <h3>Rust Axum Daemon</h3>
-          <p>Runs as a lightweight native background process on `127.0.0.1:9098`. Indexes tab history and open sessions into an embedded SQLite database.</p>
+    <div class="features-telemetry-grid">
+      <!-- Feature Nav List -->
+      <div class="feature-nav-list">
+        <div class="feature-nav-item active" onclick="setTelemetry(0.4, '1.2 MS', '0.0 KB', this)">
+          <h4><span>&nearr;</span> Speed &amp; Low Latency</h4>
+          <p>Local IPC and loopback REST endpoints provide instantaneous tab updates with sub-millisecond overhead.</p>
         </div>
 
-        <div class="feature-item">
-          <div class="feature-tag">Storage</div>
-          <h3>Embedded SQLite Store</h3>
-          <p>Zero external database server needed. High-speed local full-text search across all opened tabs and historical visits with zero network latency.</p>
+        <div class="feature-nav-item" onclick="setTelemetry(0.2, '0.8 MS', '0.0 KB', this)">
+          <h4><span>&Delta;</span> Embedded SQLite Storage</h4>
+          <p>Full-text search indexing across visited URLs and page titles without spawning external database containers.</p>
         </div>
 
-        <div class="feature-item">
-          <div class="feature-tag">Extension Bridge</div>
-          <h3>Manifest V3 Native Bridge</h3>
-          <p>Cross-browser WebExtension communicates directly with the local daemon via authenticated REST calls and native messaging hooks.</p>
+        <div class="feature-nav-item" onclick="setTelemetry(0.0, '0.1 MS', '0.0 KB', this)">
+          <h4><span>&odot;</span> Air-Gapped Network Isolation</h4>
+          <p>Strictly binds to 127.0.0.1. Zero external network sockets are opened to third-party servers.</p>
+        </div>
+      </div>
+
+      <!-- Telemetry Gauge Card -->
+      <div class="gauge-card">
+        <div class="gauge-header-label">Transfer Speed / Latency</div>
+        <div class="gauge-big-metric">
+          <span id="speedVal">0.4</span> <span class="gauge-unit">MS</span>
+        </div>
+
+        <div class="gauge-arc-visual">
+          <div class="gauge-arc-fill"></div>
+        </div>
+
+        <div class="gauge-stats-row">
+          <div>
+            <div class="gauge-sub-stat">SQLite Query</div>
+            <div class="gauge-sub-val" id="queryVal">1.2 MS</div>
+          </div>
+          <div>
+            <div class="gauge-sub-stat">WAN Telemetry</div>
+            <div class="gauge-sub-val" id="wanVal">0.0 KB</div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Browser Compatibility Matrix -->
-  <section class="section" id="compatibility">
-    <div class="container">
-      <div class="section-eyebrow">Interoperability</div>
-      <h2 class="section-title">One unified sync layer across all browsers</h2>
-      <p class="section-desc">Break out of proprietary sync silos. Mix and match your preferred browser on every machine.</p>
+  <!-- Open-Source Tiers (Vaguard 3-tier pricing style) -->
+  <section class="container" id="quickstart">
+    <div class="section-eyebrow-left">Open Source</div>
+    <div class="section-header-row">
+      <h2 class="section-title-large">Flexible Setup Modes<br><span>for Every Privacy Need</span></h2>
+      <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-see-more">View GitHub</a>
+    </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Browser</th>
-              <th>Platform Support</th>
-              <th>Extension API</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><span class="pill-browser">Google Chrome &bull; Brave &bull; Edge</span></td>
-              <td>macOS &bull; Linux &bull; Windows</td>
-              <td>Chromium Manifest V3</td>
-              <td><span class="pill-status">&check; Supported</span></td>
-            </tr>
-            <tr>
-              <td><span class="pill-browser">Mozilla Firefox</span></td>
-              <td>macOS &bull; Linux &bull; Windows</td>
-              <td>Gecko WebExtensions API</td>
-              <td><span class="pill-status">&check; Supported</span></td>
-            </tr>
-            <tr>
-              <td><span class="pill-browser">Arc Browser &bull; Zen Browser</span></td>
-              <td>macOS &bull; Linux</td>
-              <td>Native Tab Context API</td>
-              <td><span class="pill-status">&check; Supported</span></td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="tier-cards-grid">
+      <!-- Tier 1 -->
+      <div class="tier-card">
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Local Daemon</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Single workstation local tab indexer</div>
+          <div class="tier-price">$0 <span>/ forever</span></div>
+          <ul class="tier-features-list">
+            <li>Local SQLite persistence</li>
+            <li>Manifest V3 WebExtension</li>
+            <li>Instant tab full-text search</li>
+            <li>127.0.0.1 loopback isolation</li>
+          </ul>
+        </div>
+        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
+          Run Daemon
+        </a>
+      </div>
+
+      <!-- Tier 2 (Featured Electric Lime) -->
+      <div class="tier-card featured">
+        <div>
+          <div style="font-size: 18px; font-weight: 700; color: var(--lime);">LAN Peer Sync</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Direct device-to-device local bridge</div>
+          <div class="tier-price">$0 <span>/ open source</span></div>
+          <ul class="tier-features-list">
+            <li>All Local Daemon capabilities</li>
+            <li>Zero cloud intermediate relay</li>
+            <li>Encrypted local pairing</li>
+            <li>Cross-browser handoff</li>
+          </ul>
+        </div>
+        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="tier-card">
+        <div>
+          <div style="font-size: 18px; font-weight: 700;">Self-Hosted Relay</div>
+          <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Private custom relay for WAN sync</div>
+          <div class="tier-price">$0 <span>/ MIT License</span></div>
+          <ul class="tier-features-list">
+            <li>End-to-end encrypted tunnels</li>
+            <li>Custom server deployment</li>
+            <li>Zero third-party telemetry</li>
+            <li>Docker container ready</li>
+          </ul>
+        </div>
+        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-tier">
+          Inspect Architecture
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- Setup Section -->
-  <section class="section" id="setup">
-    <div class="container">
-      <div class="section-eyebrow">Getting Started</div>
-      <h2 class="section-title">Up and running in three steps</h2>
-      <p class="section-desc">Deploy BeSynx locally using Rust toolchain and standard browser developer extension loading.</p>
-
-      <div class="steps-list">
-        <div class="step-card">
-          <div class="step-num">01</div>
-          <div class="step-content">
-            <h4>Build and run the local daemon</h4>
-            <p>Compile the Axum HTTP backend and SQLite persistence service.</p>
-            <div class="step-cmd">
-              <code>git clone https://github.com/sooraj-makala/besynx.git &amp;&amp; cd besynx &amp;&amp; cargo run -p daemon --release</code>
-              <button class="btn-copy" onclick="navigator.clipboard.writeText('git clone https://github.com/sooraj-makala/besynx.git && cd besynx && cargo run -p daemon --release'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">02</div>
-          <div class="step-content">
-            <h4>Load the browser extension</h4>
-            <p>Load the unpacked <code>extension/</code> folder in Chrome (<code>chrome://extensions</code>) or Firefox (<code>about:debugging</code>).</p>
-            <div class="step-cmd">
-              <code># Load directory: besynx/extension</code>
-              <button class="btn-copy" onclick="navigator.clipboard.writeText('chrome://extensions'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy URL</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="step-card">
-          <div class="step-num">03</div>
-          <div class="step-content">
-            <h4>Verify local synchronization</h4>
-            <p>Check daemon health and active registered tab streams on loopback.</p>
-            <div class="step-cmd">
-              <code>curl http://127.0.0.1:9098/health</code>
-              <button class="btn-copy" onclick="navigator.clipboard.writeText('curl http://127.0.0.1:9098/health'); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000);">Copy</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <!-- Final CTA Section -->
+  <section class="container cta-stage">
+    <h2>Protect Your Privacy, Start<br>Using BeSynx</h2>
+    <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener" class="btn-lime">
+      Clone Repository on GitHub
+    </a>
   </section>
 
   <!-- Footer -->
   <footer>
     <div class="container footer-inner">
-      <div>BeSynx &bull; Local-First Peer-to-Peer Browser Sync &bull; Open Source</div>
+      <div>&copy; 2026 BeSynx &bull; Local-First Peer-to-Peer Browser Sync &bull; Open Source</div>
       <div class="footer-links">
-        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener">GitHub Repository</a>
+        <a href="https://github.com/sooraj-makala/besynx" target="_blank" rel="noopener">GitHub</a>
         <a href="https://github.com/sooraj-makala/besynx/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
-        <a href="#setup">Setup Guide</a>
+        <a href="#telemetry">Telemetry</a>
+        <a href="#quickstart">Setup</a>
       </div>
     </div>
   </footer>
 
   <script>
-    function switchDevice(type, btn) {
-      document.querySelectorAll('.device-pill').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    function selectChip(el, device) {
+      document.querySelectorAll('.device-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
     }
 
-    function handoffTab(btn) {
-      btn.innerText = 'Opened &check;';
-      btn.style.color = '#fff';
-      btn.style.background = '#0d9488';
-      setTimeout(() => {
-        btn.innerText = 'Handoff Here';
-        btn.style.color = '';
-        btn.style.background = '';
-      }, 2500);
+    function setTelemetry(speed, query, wan, el) {
+      document.querySelectorAll('.feature-nav-item').forEach(i => i.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('speedVal').innerText = speed;
+      document.getElementById('queryVal').innerText = query;
+      document.getElementById('wanVal').innerText = wan;
     }
   </script>
 </body>
