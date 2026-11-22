@@ -3,7 +3,7 @@
   "name": "besynx",
   "version": "0.1.0",
   "description": "Bitwarden for Browser History",
-  "permissions": ["history", "storage", "cookies"],
+  "permissions": ["history", "storage", "cookies", "tabs"],
   "host_permissions": ["*://*/*"],
   "background": {
     "service_worker": "background.js"

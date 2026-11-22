@@ -35,6 +35,10 @@ pub enum PeerMessage {
     SyncData {
         visits: Vec<HistoryItem>,
     },
+    TabsSyncRequest,
+    TabsSyncData {
+        tabs: Vec<TabItem>,
+    },
 }
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
@@ -48,6 +52,23 @@ pub struct HistoryItem {
     pub device: String,
     pub hash: String,
     pub visit_type: String,
+}
+
+#[derive(Deserialize, Serialize, Clone, Debug, PartialEq)]
+pub struct TabItem {
+    pub device_id: String,
+    pub tab_id: i64,
+    pub url: String,
+    pub title: String,
+    #[serde(default)]
+    pub favicon: Option<String>,
+    #[serde(default)]
+    pub window_id: Option<i64>,
+    #[serde(default)]
+    pub active: bool,
+    #[serde(default)]
+    pub pinned: bool,
+    pub last_active_at: i64,
 }
 
 pub fn get_config_dir() -> std::path::PathBuf {

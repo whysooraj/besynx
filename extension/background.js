@@ -4,6 +4,133 @@ let isConnecting = false;
 let reconnectDelay = 1000;
 const MAX_RECONNECT_DELAY = 30000;
 const pendingAcks = new Set();
+const COOKIE_RECORD_TTL_MS = 60000; // 60 seconds TTL
+
+// Check if chrome.storage.session is supported
+function getSessionStorage() {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.session) {
+    return chrome.storage.session;
+  }
+  return null;
+}
+
+// Hydrate in-memory Set from session storage on service worker wake
+async function restoreSessionWrites() {
+  const session = getSessionStorage();
+  if (session) {
+    try {
+      const now = Date.now();
+      const data = await session.get({ localCookieWrites: {} });
+      const writes = data.localCookieWrites || {};
+      for (const [key, ts] of Object.entries(writes)) {
+        if (now - ts <= COOKIE_RECORD_TTL_MS) {
+          localCookieWrites.add(key);
+        }
+      }
+    } catch (e) {
+      console.warn("besynx: failed to restore session writes", e);
+    }
+  }
+}
+restoreSessionWrites();
+
+// Mark a cookie write as originated locally/from daemon
+async function markLocalCookieWrite(writeKey) {
+  localCookieWrites.add(writeKey);
+  const session = getSessionStorage();
+  if (session) {
+    try {
+      const now = Date.now();
+      const data = await session.get({ localCookieWrites: {} });
+      const writes = data.localCookieWrites || {};
+
+      // Prune expired records
+      for (const key of Object.keys(writes)) {
+        if (now - writes[key] > COOKIE_RECORD_TTL_MS) {
+          delete writes[key];
+        }
+      }
+
+      writes[writeKey] = now;
+      await session.set({ localCookieWrites: writes });
+    } catch (err) {
+      console.warn("besynx: failed to save to chrome.storage.session", err);
+    }
+  }
+}
+
+// Unmark if cookie set failed
+async function unmarkLocalCookieWrite(writeKey) {
+  localCookieWrites.delete(writeKey);
+  const session = getSessionStorage();
+  if (session) {
+    try {
+      const data = await session.get({ localCookieWrites: {} });
+      const writes = data.localCookieWrites || {};
+      if (writeKey in writes) {
+        delete writes[writeKey];
+        await session.set({ localCookieWrites: writes });
+      }
+    } catch (err) {
+      console.warn("besynx: failed to unmark from chrome.storage.session", err);
+    }
+  }
+}
+
+// Check and consume local cookie write flag
+async function consumeLocalCookieWrite(writeKey) {
+  let matched = false;
+
+  // 1. Check in-memory Set
+  if (localCookieWrites.has(writeKey)) {
+    localCookieWrites.delete(writeKey);
+    matched = true;
+  }
+
+  // 2. Check chrome.storage.session
+  const session = getSessionStorage();
+  if (session) {
+    try {
+      const data = await session.get({ localCookieWrites: {} });
+      const writes = data.localCookieWrites || {};
+      const timestamp = writes[writeKey];
+      if (timestamp) {
+        delete writes[writeKey];
+        await session.set({ localCookieWrites: writes });
+        if (Date.now() - timestamp <= COOKIE_RECORD_TTL_MS) {
+          matched = true;
+        }
+      }
+    } catch (err) {
+      console.warn("besynx: failed to read from chrome.storage.session", err);
+    }
+  }
+
+  return matched;
+}
+
+// Sync open tabs to daemon
+function syncTabs() {
+  if (!chrome.tabs || !socket || socket.readyState !== WebSocket.OPEN) return;
+  chrome.tabs.query({}, (tabs) => {
+    if (chrome.runtime.lastError || !tabs) return;
+    const tabList = tabs.map(t => ({
+      tab_id: t.id,
+      url: t.url || "",
+      title: t.title || "",
+      favicon: t.favIconUrl || "",
+      window_id: t.windowId,
+      active: !!t.active,
+      pinned: !!t.pinned,
+      last_active_at: Date.now()
+    }));
+    socket.send(JSON.stringify({
+      event: "tabs_snapshot",
+      device_id: "local",
+      tabs: tabList
+    }));
+  });
+}
 
 function connect() {
   if (isConnecting || (socket && (socket.readyState === WebSocket.CONNECTING || socket.readyState === WebSocket.OPEN))) return;
@@ -25,6 +152,7 @@ function connect() {
       pendingAcks.clear();
       socket.send(JSON.stringify({ event: "hello", device: "extension" }));
       await flushQueue();
+      syncTabs();
     };
 
     socket.onmessage = async (event) => {
@@ -36,7 +164,7 @@ function connect() {
         } else if (msg.event === "cookie_changed") {
           const normalizedDomain = msg.domain.startsWith(".") ? msg.domain.slice(1) : msg.domain;
           const writeKey = `${normalizedDomain}|${msg.name}|${msg.value}|${msg.path}`;
-          localCookieWrites.add(writeKey);
+          await markLocalCookieWrite(writeKey);
 
           const url = (msg.secure ? "https://" : "http://") + normalizedDomain + msg.path;
 
@@ -60,22 +188,22 @@ function connect() {
             details.expirationDate = msg.expiration_date;
           }
 
-          chrome.cookies.set(details, (cookie) => {
+          chrome.cookies.set(details, async (cookie) => {
             if (chrome.runtime.lastError) {
               console.error("besynx: failed to set cookie:", chrome.runtime.lastError.message);
-              localCookieWrites.delete(writeKey);
+              await unmarkLocalCookieWrite(writeKey);
             }
           });
         } else if (msg.event === "cookie_deleted") {
           const normalizedDomain = msg.domain.startsWith(".") ? msg.domain.slice(1) : msg.domain;
           const writeKey = `${normalizedDomain}|${msg.name}|DELETED|${msg.path}`;
-          localCookieWrites.add(writeKey);
+          await markLocalCookieWrite(writeKey);
 
           const url = (msg.secure ? "https://" : "http://") + normalizedDomain + msg.path;
-          chrome.cookies.remove({ url: url, name: msg.name }, () => {
+          chrome.cookies.remove({ url: url, name: msg.name }, async () => {
             if (chrome.runtime.lastError) {
               console.error("besynx: failed to remove cookie:", chrome.runtime.lastError.message);
-              localCookieWrites.delete(writeKey);
+              await unmarkLocalCookieWrite(writeKey);
             }
           });
         }
@@ -162,11 +290,10 @@ chrome.history.onVisited.addListener(async (historyItem) => {
 chrome.cookies.onChanged.addListener(async (changeInfo) => {
   const cookie = changeInfo.cookie;
   const normalizedDomain = cookie.domain.startsWith(".") ? cookie.domain.slice(1) : cookie.domain;
-  
+
   if (changeInfo.removed) {
     const writeKey = `${normalizedDomain}|${cookie.name}|DELETED|${cookie.path}`;
-    if (localCookieWrites.has(writeKey)) {
-      localCookieWrites.delete(writeKey);
+    if (await consumeLocalCookieWrite(writeKey)) {
       return;
     }
 
@@ -188,8 +315,7 @@ chrome.cookies.onChanged.addListener(async (changeInfo) => {
 
   if (changeInfo.cause === "explicit" || changeInfo.cause === "overwrite") {
     const writeKey = `${normalizedDomain}|${cookie.name}|${cookie.value}|${cookie.path}`;
-    if (localCookieWrites.has(writeKey)) {
-      localCookieWrites.delete(writeKey);
+    if (await consumeLocalCookieWrite(writeKey)) {
       return;
     }
 
@@ -213,6 +339,19 @@ chrome.cookies.onChanged.addListener(async (changeInfo) => {
     await flushQueue();
   }
 });
+
+// Tab listeners to automatically keep open tabs snapshot synchronized
+if (chrome.tabs) {
+  let tabDebounce = null;
+  function triggerTabSync() {
+    clearTimeout(tabDebounce);
+    tabDebounce = setTimeout(syncTabs, 500);
+  }
+  chrome.tabs.onCreated.addListener(triggerTabSync);
+  chrome.tabs.onUpdated.addListener(triggerTabSync);
+  chrome.tabs.onRemoved.addListener(triggerTabSync);
+  chrome.tabs.onActivated.addListener(triggerTabSync);
+}
 
 // Initial connection attempt
 connect();
