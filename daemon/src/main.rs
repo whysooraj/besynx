@@ -1,17 +1,20 @@
 use axum::{
+    extract::{
+        ws::{WebSocket, WebSocketUpgrade},
+        State,
+    },
+    http::{HeaderMap, StatusCode},
+    response::Response,
     routing::{get, post},
     Router,
-    extract::{ws::{WebSocketUpgrade, WebSocket}, State},
-    response::Response,
-    http::{HeaderMap, StatusCode},
 };
+use protocol::{get_config_dir, CookieEvent, HistoryItem, PeerMessage};
 use sqlx::sqlite::SqlitePool;
+use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
 use std::time::Instant;
 use tokio::sync::mpsc;
-use protocol::{CookieEvent, PeerMessage, HistoryItem, get_config_dir};
 
 #[derive(Clone)]
 struct AppState {
@@ -24,32 +27,33 @@ struct AppState {
     token: String,
 }
 
-
 #[tokio::main]
 async fn main() {
     tracing_subscriber::fmt::init();
-    
+
     // Initialize Database
     let config_dir = get_config_dir();
     std::fs::create_dir_all(&config_dir).unwrap();
     let db_path = config_dir.join("besynx.db");
-    
+
     // Create db file if it doesn't exist
     if !db_path.exists() {
         std::fs::File::create(&db_path).unwrap();
     }
     let db_url = format!("sqlite://{}", db_path.to_str().unwrap());
     let db = SqlitePool::connect(&db_url).await.unwrap();
-    
+
     // Run migrations
     sqlx::migrate!("./migrations").run(&db).await.unwrap();
     tracing::info!("Database migrations applied");
 
     let key_path = config_dir.join("besynx.key");
-    let identity = Arc::new(crypto::Identity::load_or_generate(&key_path).unwrap_or_else(|e| {
-        tracing::error!("Identity initialization error: {}", e);
-        std::process::exit(1);
-    }));
+    let identity = Arc::new(
+        crypto::Identity::load_or_generate(&key_path).unwrap_or_else(|e| {
+            tracing::error!("Identity initialization error: {}", e);
+            std::process::exit(1);
+        }),
+    );
     let pending_challenges = Arc::new(Mutex::new(HashMap::new()));
     let extension_txs = Arc::new(Mutex::new(HashMap::new()));
 
@@ -60,7 +64,10 @@ async fn main() {
             use std::os::unix::fs::PermissionsExt;
             let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
         }
-        std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
+        std::fs::read_to_string(&token_path)
+            .unwrap_or_default()
+            .trim()
+            .to_string()
     } else {
         let t = uuid::Uuid::now_v7().to_string();
         #[cfg(unix)]
@@ -95,7 +102,6 @@ async fn main() {
         token,
     });
 
-
     let app = Router::new()
         .route("/", get(|| async { "besynx daemon active" }))
         .route("/sync", get(ws_handler))
@@ -115,9 +121,7 @@ struct ChallengeResponse {
     challenge: String,
 }
 
-async fn pair_challenge(
-    State(state): State<Arc<AppState>>,
-) -> axum::Json<ChallengeResponse> {
+async fn pair_challenge(State(state): State<Arc<AppState>>) -> axum::Json<ChallengeResponse> {
     use rand::RngCore;
     let mut nonce = [0u8; 16];
     rand::thread_rng().fill_bytes(&mut nonce);
@@ -128,7 +132,9 @@ async fn pair_challenge(
     list.retain(|_, time| time.elapsed().as_secs() < 300);
     list.insert(challenge_hex.clone(), Instant::now());
 
-    axum::Json(ChallengeResponse { challenge: challenge_hex })
+    axum::Json(ChallengeResponse {
+        challenge: challenge_hex,
+    })
 }
 
 #[derive(serde::Deserialize)]
@@ -180,7 +186,7 @@ async fn pair_response(
     let now = chrono::Utc::now().timestamp_millis();
     sqlx::query(
         "INSERT OR REPLACE INTO devices (id, name, public_key, last_seen)
-         VALUES (?, ?, ?, ?)"
+         VALUES (?, ?, ?, ?)",
     )
     .bind(&req.device_id)
     .bind(&req.device_name)
@@ -190,11 +196,16 @@ async fn pair_response(
     .await
     .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
-    tracing::info!("Successfully paired device: {} ({})", req.device_name, req.device_id);
+    tracing::info!(
+        "Successfully paired device: {} ({})",
+        req.device_name,
+        req.device_id
+    );
     let daemon_pubkey = hex::encode(state.identity.public_key().to_bytes());
-    Ok(axum::Json(PairResponseData { public_key_hex: daemon_pubkey }))
+    Ok(axum::Json(PairResponseData {
+        public_key_hex: daemon_pubkey,
+    }))
 }
-
 
 #[derive(serde::Deserialize)]
 #[allow(dead_code)]
@@ -215,8 +226,13 @@ async fn ws_handler(
     match headers.get("origin") {
         Some(origin) => {
             if let Ok(origin_str) = origin.to_str() {
-                if !origin_str.starts_with("chrome-extension://") && !origin_str.starts_with("moz-extension://") {
-                    tracing::warn!("Blocked WebSocket connection from invalid origin: {}", origin_str);
+                if !origin_str.starts_with("chrome-extension://")
+                    && !origin_str.starts_with("moz-extension://")
+                {
+                    tracing::warn!(
+                        "Blocked WebSocket connection from invalid origin: {}",
+                        origin_str
+                    );
                     return Err(StatusCode::FORBIDDEN);
                 }
             } else {
@@ -257,15 +273,22 @@ async fn handle_socket(socket: WebSocket, state: Arc<AppState>) {
     tracing::info!("client disconnected");
 }
 
-async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+async fn handle_socket_inner(
+    socket: WebSocket,
+    state: Arc<AppState>,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     use futures_util::{SinkExt, StreamExt};
-    
+
     let (mut ws_sender, mut ws_receiver) = socket.split();
     let conn_id = uuid::Uuid::now_v7().to_string();
     let (tx, mut rx) = mpsc::unbounded_channel();
-    
-    state.extension_txs.lock().unwrap().insert(conn_id.clone(), tx);
-    
+
+    state
+        .extension_txs
+        .lock()
+        .unwrap()
+        .insert(conn_id.clone(), tx);
+
     let write_task = tokio::spawn(async move {
         while let Some(msg) = rx.recv().await {
             if ws_sender.send(msg).await.is_err() {
@@ -288,12 +311,16 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
                 }
                 if event == "visited" {
                     if let Ok(raw_visited) = serde_json::from_value::<RawMessage>(raw.clone()) {
-                        let id = raw_visited.id.unwrap_or_else(|| uuid::Uuid::now_v7().to_string());
+                        let id = raw_visited
+                            .id
+                            .unwrap_or_else(|| uuid::Uuid::now_v7().to_string());
                         let url = raw_visited.url.unwrap_or_default();
                         let title = raw_visited.title.unwrap_or_default();
-                        let timestamp = raw_visited.timestamp.unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
+                        let timestamp = raw_visited
+                            .timestamp
+                            .unwrap_or_else(|| chrono::Utc::now().timestamp_millis());
                         let normalized_url = url.trim().to_lowercase();
-                        
+
                         let db_result = async {
                             let mut tx = state.db.begin().await?;
                             sqlx::query(
@@ -330,17 +357,28 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
 
                         match db_result {
                             Ok(()) => {
-                                let ack_resp = serde_json::to_string(&serde_json::json!({ "ack": id })).unwrap();
-                                let _ = state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
-                                    let _ = tx.send(axum::extract::ws::Message::Text(ack_resp.into()));
-                                });
+                                let ack_resp =
+                                    serde_json::to_string(&serde_json::json!({ "ack": id }))
+                                        .unwrap();
+                                let _ =
+                                    state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
+                                        let _ = tx.send(axum::extract::ws::Message::Text(
+                                            ack_resp.into(),
+                                        ));
+                                    });
                             }
                             Err(e) => {
                                 tracing::error!("Failed to store visit item {}: {:?}", id, e);
-                                let nack_resp = serde_json::to_string(&serde_json::json!({ "nack": id, "error": e.to_string() })).unwrap();
-                                let _ = state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
-                                    let _ = tx.send(axum::extract::ws::Message::Text(nack_resp.into()));
-                                });
+                                let nack_resp = serde_json::to_string(
+                                    &serde_json::json!({ "nack": id, "error": e.to_string() }),
+                                )
+                                .unwrap();
+                                let _ =
+                                    state.extension_txs.lock().unwrap().get(&conn_id).map(|tx| {
+                                        let _ = tx.send(axum::extract::ws::Message::Text(
+                                            nack_resp.into(),
+                                        ));
+                                    });
                             }
                         }
                     }
@@ -366,7 +404,8 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
                         if let Err(e) = db_res {
                             tracing::error!("Failed to store cookie {}: {:?}", cookie_evt.name, e);
                         } else {
-                            let broadcast_msg = axum::extract::ws::Message::Text(text.to_string().into());
+                            let broadcast_msg =
+                                axum::extract::ws::Message::Text(text.to_string().into());
                             let txs = state.extension_txs.lock().unwrap();
                             for (cid, tx) in txs.iter() {
                                 if cid != &conn_id {
@@ -382,7 +421,7 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
                         raw.get("path").and_then(|v| v.as_str()),
                     ) {
                         let db_res = sqlx::query(
-                            "DELETE FROM cookies WHERE domain = ? AND name = ? AND path = ?"
+                            "DELETE FROM cookies WHERE domain = ? AND name = ? AND path = ?",
                         )
                         .bind(domain)
                         .bind(name)
@@ -393,7 +432,8 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
                         if let Err(e) = db_res {
                             tracing::error!("Failed to delete cookie {}: {:?}", name, e);
                         } else {
-                            let broadcast_msg = axum::extract::ws::Message::Text(text.to_string().into());
+                            let broadcast_msg =
+                                axum::extract::ws::Message::Text(text.to_string().into());
                             let txs = state.extension_txs.lock().unwrap();
                             for (cid, tx) in txs.iter() {
                                 if cid != &conn_id {
@@ -414,12 +454,7 @@ async fn handle_socket_inner(socket: WebSocket, state: Arc<AppState>) -> Result<
     Ok(())
 }
 
-
-
-async fn ws_peer_handler(
-    State(state): State<Arc<AppState>>,
-    ws: WebSocketUpgrade,
-) -> Response {
+async fn ws_peer_handler(State(state): State<Arc<AppState>>, ws: WebSocketUpgrade) -> Response {
     ws.on_upgrade(move |socket| handle_peer_socket(socket, state))
 }
 
@@ -431,7 +466,10 @@ async fn handle_peer_socket(mut socket: WebSocket, state: Arc<AppState>) {
     tracing::info!("peer disconnected");
 }
 
-async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) -> Result<(), Box<dyn std::error::Error>> {
+async fn handle_peer_socket_inner(
+    socket: &mut WebSocket,
+    state: Arc<AppState>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let msg = match socket.recv().await {
         Some(Ok(msg)) => msg,
         _ => return Ok(()),
@@ -439,7 +477,10 @@ async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) 
     let text = msg.to_text()?;
     let init: PeerMessage = serde_json::from_str(text)?;
     let (peer_device_id, peer_challenge) = match init {
-        PeerMessage::HandshakeInit { device_id, challenge_hex } => (device_id, challenge_hex),
+        PeerMessage::HandshakeInit {
+            device_id,
+            challenge_hex,
+        } => (device_id, challenge_hex),
         _ => {
             tracing::warn!("Unexpected first message, expected HandshakeInit");
             return Ok(());
@@ -479,7 +520,11 @@ async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) 
         signature_hex,
         challenge_hex: local_challenge.clone(),
     };
-    socket.send(axum::extract::ws::Message::Text(serde_json::to_string(&resp)?.into())).await?;
+    socket
+        .send(axum::extract::ws::Message::Text(
+            serde_json::to_string(&resp)?.into(),
+        ))
+        .await?;
 
     let msg = match socket.recv().await {
         Some(Ok(msg)) => msg,
@@ -511,14 +556,21 @@ async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) 
 
     tracing::info!("Peer {} authenticated successfully", peer_device_id);
 
-    let last_ts: i64 = sqlx::query_scalar::<_, Option<i64>>("SELECT MAX(timestamp) FROM history WHERE device = ?")
-        .bind(&peer_device_id)
-        .fetch_one(&state.db)
-        .await?
-        .unwrap_or(0);
+    let last_ts: i64 =
+        sqlx::query_scalar::<_, Option<i64>>("SELECT MAX(timestamp) FROM history WHERE device = ?")
+            .bind(&peer_device_id)
+            .fetch_one(&state.db)
+            .await?
+            .unwrap_or(0);
 
-    let sync_req = PeerMessage::SyncRequest { last_timestamp: last_ts };
-    socket.send(axum::extract::ws::Message::Text(serde_json::to_string(&sync_req)?.into())).await?;
+    let sync_req = PeerMessage::SyncRequest {
+        last_timestamp: last_ts,
+    };
+    socket
+        .send(axum::extract::ws::Message::Text(
+            serde_json::to_string(&sync_req)?.into(),
+        ))
+        .await?;
 
     while let Some(Ok(msg)) = socket.recv().await {
         if let Ok(text) = msg.to_text() {
@@ -529,22 +581,29 @@ async fn handle_peer_socket_inner(socket: &mut WebSocket, state: Arc<AppState>) 
                             .bind(last_timestamp)
                             .fetch_all(&state.db)
                             .await?;
-                        let visits: Vec<HistoryItem> = rows.into_iter().map(|row| {
-                            use sqlx::Row;
-                            HistoryItem {
-                                uuid: row.get("uuid"),
-                                url: row.get("url"),
-                                normalized_url: row.get("normalized_url"),
-                                title: row.get("title"),
-                                timestamp: row.get("timestamp"),
-                                browser: row.get("browser"),
-                                device: row.get("device"),
-                                hash: row.get("hash"),
-                                visit_type: row.get("visit_type"),
-                            }
-                        }).collect();
+                        let visits: Vec<HistoryItem> = rows
+                            .into_iter()
+                            .map(|row| {
+                                use sqlx::Row;
+                                HistoryItem {
+                                    uuid: row.get("uuid"),
+                                    url: row.get("url"),
+                                    normalized_url: row.get("normalized_url"),
+                                    title: row.get("title"),
+                                    timestamp: row.get("timestamp"),
+                                    browser: row.get("browser"),
+                                    device: row.get("device"),
+                                    hash: row.get("hash"),
+                                    visit_type: row.get("visit_type"),
+                                }
+                            })
+                            .collect();
                         let resp = PeerMessage::SyncData { visits };
-                        let _ = socket.send(axum::extract::ws::Message::Text(serde_json::to_string(&resp)?.into())).await;
+                        let _ = socket
+                            .send(axum::extract::ws::Message::Text(
+                                serde_json::to_string(&resp)?.into(),
+                            ))
+                            .await;
                     }
                     PeerMessage::SyncData { visits } => {
                         let mut tx = state.db.begin().await?;
@@ -596,7 +655,8 @@ mod tests {
     #[cfg(unix)]
     fn test_token_file_permissions() {
         use std::os::unix::fs::PermissionsExt;
-        let temp_dir = std::env::temp_dir().join(format!("besynx_token_test_{}", uuid::Uuid::now_v7()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("besynx_token_test_{}", uuid::Uuid::now_v7()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let token_path = temp_dir.join("besynx.token");
 
@@ -605,9 +665,13 @@ mod tests {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+                let _ =
+                    std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
             }
-            std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
+            std::fs::read_to_string(&token_path)
+                .unwrap_or_default()
+                .trim()
+                .to_string()
         } else {
             let t = uuid::Uuid::now_v7().to_string();
             #[cfg(unix)]
@@ -624,7 +688,8 @@ mod tests {
                     let _ = f.write_all(t.as_bytes());
                 }
                 use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+                let _ =
+                    std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
             }
             #[cfg(not(unix))]
             {
@@ -639,15 +704,22 @@ mod tests {
 
         // Pre-existing file with 0644 should be reset to 0600
         std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o644)).unwrap();
-        assert_eq!(std::fs::metadata(&token_path).unwrap().permissions().mode() & 0o777, 0o644);
+        assert_eq!(
+            std::fs::metadata(&token_path).unwrap().permissions().mode() & 0o777,
+            0o644
+        );
 
         let read_token = if token_path.exists() {
             #[cfg(unix)]
             {
                 use std::os::unix::fs::PermissionsExt;
-                let _ = std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
+                let _ =
+                    std::fs::set_permissions(&token_path, std::fs::Permissions::from_mode(0o600));
             }
-            std::fs::read_to_string(&token_path).unwrap_or_default().trim().to_string()
+            std::fs::read_to_string(&token_path)
+                .unwrap_or_default()
+                .trim()
+                .to_string()
         } else {
             let t = uuid::Uuid::now_v7().to_string();
             t
@@ -660,5 +732,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(&temp_dir);
     }
 }
-
-

@@ -1,6 +1,6 @@
-use std::sync::{Arc, Mutex};
-use std::process::Child;
 use std::io::{BufRead, BufReader};
+use std::process::Child;
+use std::sync::{Arc, Mutex};
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::TrayIconBuilder,
@@ -99,9 +99,17 @@ fn get_daemon_logs(state: tauri::State<'_, DaemonState>) -> Vec<String> {
 fn get_daemon_path() -> std::path::PathBuf {
     let mut daemon_path = std::env::current_exe().unwrap();
     daemon_path.pop(); // Remove app binary name
-    daemon_path.push(if cfg!(target_os = "windows") { "besynx-daemon.exe" } else { "besynx-daemon" });
+    daemon_path.push(if cfg!(target_os = "windows") {
+        "besynx-daemon.exe"
+    } else {
+        "besynx-daemon"
+    });
     if !daemon_path.exists() {
-        daemon_path = std::path::PathBuf::from(if cfg!(target_os = "windows") { "besynx-daemon.exe" } else { "besynx-daemon" });
+        daemon_path = std::path::PathBuf::from(if cfg!(target_os = "windows") {
+            "besynx-daemon.exe"
+        } else {
+            "besynx-daemon"
+        });
     }
     daemon_path
 }
@@ -117,7 +125,7 @@ fn control_daemon(state: tauri::State<'_, DaemonState>, action: String) -> Resul
                 .stderr(std::process::Stdio::piped())
                 .spawn()
                 .map_err(|e| e.to_string())?;
-            
+
             let logs = state.logs.clone();
             if let Some(stdout) = child.stdout.take() {
                 let logs = logs.clone();
@@ -194,14 +202,18 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(daemon_state)
         .manage(AppDbState { pool })
-        .invoke_handler(tauri::generate_handler![get_stats, get_daemon_logs, control_daemon])
+        .invoke_handler(tauri::generate_handler![
+            get_stats,
+            get_daemon_logs,
+            control_daemon
+        ])
         .setup(|app| {
             let daemon_path = get_daemon_path();
             let child = std::process::Command::new(daemon_path)
                 .stdout(std::process::Stdio::piped())
                 .stderr(std::process::Stdio::piped())
                 .spawn();
-            
+
             match child {
                 Ok(mut c) => {
                     let state = app.state::<DaemonState>();
@@ -244,7 +256,8 @@ pub fn run() {
                 }
             }
 
-            let status_i = MenuItem::with_id(app, "status", "Status: Daemon Running", false, None::<&str>)?;
+            let status_i =
+                MenuItem::with_id(app, "status", "Status: Daemon Running", false, None::<&str>)?;
             let stats_i = MenuItem::with_id(app, "stats", "Last Sync: N/A", false, None::<&str>)?;
             let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let show_i = MenuItem::with_id(app, "show", "Open Dashboard", true, None::<&str>)?;
@@ -254,15 +267,7 @@ pub fn run() {
 
             let menu = Menu::with_items(
                 app,
-                &[
-                    &status_i,
-                    &stats_i,
-                    &sep1,
-                    &show_i,
-                    &hide_i,
-                    &sep2,
-                    &quit_i,
-                ],
+                &[&status_i, &stats_i, &sep1, &show_i, &hide_i, &sep2, &quit_i],
             )?;
 
             let status_clone = status_i.clone();
@@ -290,13 +295,18 @@ pub fn run() {
                         }
                     };
 
-                    let status_text = if is_running { "Status: Daemon Running" } else { "Status: Daemon Stopped" };
+                    let status_text = if is_running {
+                        "Status: Daemon Running"
+                    } else {
+                        "Status: Daemon Stopped"
+                    };
                     let _ = status_clone.set_text(status_text);
 
-                    let last_sync: Option<i64> = sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
-                        .fetch_one(&pool_clone)
-                        .await
-                        .unwrap_or(None);
+                    let last_sync: Option<i64> =
+                        sqlx::query_scalar("SELECT MAX(timestamp) FROM history")
+                            .fetch_one(&pool_clone)
+                            .await
+                            .unwrap_or(None);
 
                     let stats_text = match last_sync {
                         Some(ts) => {
@@ -312,33 +322,34 @@ pub fn run() {
                 }
             });
 
-            let icon = app.default_window_icon().cloned().expect("failed to get default window icon");
+            let icon = app
+                .default_window_icon()
+                .cloned()
+                .expect("failed to get default window icon");
 
             let _tray = TrayIconBuilder::new()
                 .icon(icon)
                 .menu(&menu)
-                .on_menu_event(|app, event| {
-                    match event.id.as_ref() {
-                        "show" => {
-                            if let Some(window) = app.get_webview_window("main") {
-                                let _ = window.show();
-                                let _ = window.set_focus();
-                            }
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.set_focus();
                         }
-                        "hide" => {
-                            if let Some(window) = app.get_webview_window("main") {
-                                let _ = window.hide();
-                            }
-                        }
-                        "quit" => {
-                            let state = app.state::<DaemonState>();
-                            if let Some(mut child) = state.child.lock().unwrap().take() {
-                                let _ = child.kill();
-                            }
-                            app.exit(0);
-                        }
-                        _ => {}
                     }
+                    "hide" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.hide();
+                        }
+                    }
+                    "quit" => {
+                        let state = app.state::<DaemonState>();
+                        if let Some(mut child) = state.child.lock().unwrap().take() {
+                            let _ = child.kill();
+                        }
+                        app.exit(0);
+                    }
+                    _ => {}
                 })
                 .build(app)?;
 
