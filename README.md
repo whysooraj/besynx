@@ -6,6 +6,17 @@
 
 `besynx` (Browser Extension Sync) is a **local-first, peer-to-peer browser sync daemon and extension** that securely syncs browser history and active cookies across your browsers and devices without any cloud dependencies. It acts like **Bitwarden for browser history**.
 
+## Current Scope & Architecture Status
+
+* **Working Today (Single Device Cross-Browser)**: 
+  * Real-time bidirectional cookie sync between **Chrome and Firefox** on the same machine via the local daemon (`127.0.0.1:9098`).
+  * Cross-browser tab registration and query bridge (`/v1/tabs/register` & `/tabs` in SQLite).
+  * Centralized local history event aggregation into `besynx.db`.
+  * Origin validation for Chrome (32-char ID) and Firefox (UUID) extensions + Bearer token authentication.
+* **Under Development (Multi-Device P2P)**:
+  * Automatic LAN peer discovery via mDNS / UDP broadcast ([Issue #1](https://github.com/whysooraj/besynx/issues/1)).
+  * Noise Protocol / TLS transport session encryption ([Issue #5](https://github.com/whysooraj/besynx/issues/5)).
+
 ## Key Features
 * **Zero Cloud Dependency**: Runs entirely locally on your network. Your history never leaves your devices.
 * **Mutual Authentication**: Paired devices establish secure trust using **Ed25519** cryptographic identity keys and signatures.
